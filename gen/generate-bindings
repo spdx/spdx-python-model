@@ -1,0 +1,25 @@
+#! /bin/sh
+#
+# SPDX-License-Identifier: Apache-2.0
+
+set -e
+
+# SPDX versions to generate
+SPDX_VERSIONS="3.0.1"
+
+mkdir -p "gen"
+
+echo "# Import all versions" > __init__.py
+
+for v in $SPDX_VERSIONS; do
+    MODNAME="v$(echo "$v" | sed 's/[^a-zA-Z0-9_]/_/g')"
+
+    shacl2code generate --input https://spdx.org/rdf/$v/spdx-model.ttl \
+        --input https://spdx.org/rdf/$v/spdx-json-serialize-annotations.ttl \
+        --context https://spdx.org/rdf/$v/spdx-context.jsonld \
+        --license Apache-2.0 \
+        python \
+        -o "$MODNAME.py"
+
+    echo "from . import $MODNAME" >> __init__.py
+done

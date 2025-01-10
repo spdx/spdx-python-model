@@ -1,0 +1,59 @@
+[project]
+name = "spdx_python_model"
+description = "SPDX Model Python Bindings"
+dynamic = ["version"]
+dependencies = []
+requires-python = ">= 3.9"
+authors = [
+    {name = "Joshua Watt", email = "JPEWhacker@gmail.com"},
+]
+readme = "README.md"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Build Tools",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+[project.optional-dependencies]
+dev = [
+    "shacl2code == 0.0.18",
+    "pytest >= 7.4",
+]
+
+[project.urls]
+Homepage = "https://github.com/spdx/spdx-python-model"
+Repository = "https://github.com/spdx/spdx-python-model.git"
+Issues = "https://github.com/spdx/spdx-python-model/issues"
+
+[build-system]
+requires = [
+    "hatchling",
+    "hatch-build-scripts",
+    "shacl2code == 0.0.18",
+]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "src/spdx_python_model/version.py"
+
+[tool.pytest.ini_options]
+addopts = [
+    "--import-mode=importlib",
+]
+
+[[tool.hatch.build.hooks.build-scripts.scripts]]
+out_dir = "src/spdx_python_model/bindings"
+work_dir = "gen"
+clean_out_dir = true
+commands = [
+    "./generate-bindings"
+]
+artifacts = [
+    "*.py"
+]

@@ -1,0 +1,38 @@
+---
+name: Upload SPDX Python Bindings
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  test:
+    uses: ./.github/workflows/test.yaml
+
+  deploy:
+    needs:
+      - test
+
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install build
+
+      - name: Build package
+        run: python -m build
+
+# Uncomment this once we have a PyPi repo
+#      - name: Publish distribution to PyPI
+#        uses: pypa/gh-action-pypi-publish@release/v1
