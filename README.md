@@ -1,4 +1,5 @@
 # spdx-python-model
+
 Generated Python code for SPDX Spec version 3
 
 All bindings in this repository are generated using
@@ -15,7 +16,6 @@ doesn't yet support SPDX 3)
 ## Installation (PyPi)
 
 **TODO** Add instructions for how to install these from PyPi once they are published there
-
 
 ## Installation (Git)
 
@@ -44,11 +44,10 @@ p = spdx_python_model.v3_0_1.Person()
 Alternatively, if a shorter name is desired, a specific version can be imported
 with another name:
 
-
 ```python
-from spdx_python_model import v3_0_1 as spdx_3_0_1
+from spdx_python_model import v3_0_1 as spdx_3_0
 
-p = spdx_3_0_1.Person()
+p = spdx_3_0.Person()
 ```
 
 ## Testing
