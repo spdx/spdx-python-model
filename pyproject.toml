@@ -22,7 +22,7 @@ classifiers = [
 
 [project.optional-dependencies]
 dev = [
-    "shacl2code == 0.0.18",
+    "shacl2code == 0.0.20",
     "pytest >= 7.4",
 ]
 
@@ -35,7 +35,7 @@ Issues = "https://github.com/spdx/spdx-python-model/issues"
 requires = [
     "hatchling",
     "hatch-build-scripts",
-    "shacl2code == 0.0.18",
+    "shacl2code == 0.0.20",
 ]
 build-backend = "hatchling.build"
 
