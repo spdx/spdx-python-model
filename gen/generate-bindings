@@ -7,9 +7,12 @@ set -e
 # SPDX versions to generate
 SPDX_VERSIONS="3.0.1"
 
-mkdir -p "gen"
+mkdir -p "bindings"
 
-echo "# Import all versions" > __init__.py
+echo "# SPDX-License-Identifier: Apache-2.0\n" > __init__.py
+echo "# Import all versions" >> __init__.py
+
+ALL_MODULES=""
 
 for v in $SPDX_VERSIONS; do
     MODNAME="v$(echo "$v" | sed 's/[^a-zA-Z0-9_]/_/g')"
@@ -19,7 +22,18 @@ for v in $SPDX_VERSIONS; do
         --context https://spdx.org/rdf/$v/spdx-context.jsonld \
         --license Apache-2.0 \
         python \
-        -o "$MODNAME.py"
+        -o "bindings/$MODNAME.py"
 
-    echo "from . import $MODNAME" >> __init__.py
+    ALL_MODULES="$ALL_MODULES\n    \"$MODNAME\","
+
+    echo "from .bindings import $MODNAME" >> __init__.py
+    echo "Generated version: $v"
 done
+
+echo "from .version import VERSION" >> __init__.py
+echo "" >> __init__.py
+echo "__all__ = [$ALL_MODULES" >> __init__.py
+echo "    \"VERSION\"" >> __init__.py
+echo "]" >> __init__.py
+
+echo "You can now move __init__.py and bindings/ to src/spdx_python_model/"
