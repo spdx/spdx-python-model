@@ -1,5 +1,9 @@
 # SPDX-FileType: SOURCE
 # SPDX-License-Identifier: Apache-2.0
+#
+# Class/individual/property/vocabulary entry existence tests are based on
+# the change log at:
+# https://github.com/spdx/spdx-3-model/blob/develop/CHANGELOG.md
 
 
 def test_import():
@@ -20,12 +24,33 @@ def test_version():
     print(VERSION)
 
 
-def test_property_exist():
+def test_exist_class():
+    """
+    Test the existence of specific classes in SPDX versions
+    """
+    from spdx_python_model import v3_0_1
+
+    # 3.0.1: "IndividualElement" class added
+    e = v3_0_1.IndividualElement()
+
+
+def test_exist_individual():
+    """
+    Test the existence of specific individuals in SPDX versions
+    """
+
+    from spdx_python_model import v3_0_1
+
+    # 3.0.1: "SpdxOrganization" individual added
+    o = v3_0_1.Organization()
+    assert (
+        "SpdxOrganization" in o.NAMED_INDIVIDUALS
+    ), "3.0.1: 'SpdxOrganization' individual is missing"
+
+
+def test_exist_property():
     """
     Test the existence of specific properties in SPDX versions
-
-    Based on the change log:
-    https://github.com/spdx/spdx-3-model/blob/develop/CHANGELOG.md
     """
     from spdx_python_model import v3_0_1
 
@@ -42,7 +67,7 @@ def test_property_exist():
     ), "3.0.1: 'build_parameter' property is missing from 'build_Build'"
     assert not hasattr(
         b, "build_parameters"
-    ), "3.0.1: 'build_parameters' attribute should not be presented in 'build_Build'"
+    ), "3.0.1: 'build_parameters' property should not be presented in 'build_Build'"
 
     # 3.0.1: "/Software/contentType" removed (duplicate of "/Core/contentType")
     f = v3_0_1.software_File()
@@ -51,7 +76,7 @@ def test_property_exist():
     ), "3.0.1: 'contentType' property is missing from 'software_File'"
     assert not hasattr(
         f, "software_contentType"
-    ), "3.0.1: 'software_contentType' attribute should not be presented in 'software_File'"
+    ), "3.0.1: 'software_contentType' property should not be presented in 'software_File'"
 
     p = v3_0_1.ai_AIPackage()
     assert hasattr(
@@ -59,12 +84,9 @@ def test_property_exist():
     ), "3.0.1: 'ai_domain' property is missing from 'ai_AIPackage'"
 
 
-def test_vocab_entry_exist():
+def test_exist_vocab_entry():
     """
     Test the existence of specific vocabulary entries in SPDX versions
-
-    Based on the change log:
-    https://github.com/spdx/spdx-3-model/blob/develop/CHANGELOG.md
     """
 
     from spdx_python_model import v3_0_1
@@ -80,20 +102,11 @@ def test_vocab_entry_exist():
     assert not hasattr(
         r, "hasPrerequsite"
     ), "3.0.1: 'hasPrerequsite' (misspelled) entry should not be presented in 'RelationshipType'"
-
-
-def test_special_individual_exist():
-    """
-    Test the existence of specific individuals in SPDX versions
-
-    Based on the change log:
-    https://github.com/spdx/spdx-3-model/blob/develop/CHANGELOG.md
-    """
-
-    from spdx_python_model import v3_0_1
-
-    # 3.0.1: "SpdxOrganization" added
-    o = v3_0_1.Organization()
-    assert (
-        "SpdxOrganization" in o.NAMED_INDIVIDUALS
-    ), "3.0.1: 'SpdxOrganization' is missing"
+    # 3.0.1: "hasInputs" replaced by "hasInput"
+    assert not hasattr(
+        r, "hasInputs"
+    ), "3.0.1: 'hasInputs' entry should not be presented in 'RelationshipType'"
+    # 3.0.1: "hasOutputs" replaced by "hasOutput"
+    assert not hasattr(
+        r, "hasOutputs"
+    ), "3.0.1: 'hasOutputs' entry should not be presented in 'RelationshipType'"
