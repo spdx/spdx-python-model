@@ -29,22 +29,71 @@ def test_property_exist():
     """
     from spdx_python_model import v3_0_1
 
-    # "imports" replaced by "import" in 3.0.1
+    # 3.0.1: "/Core/imports" replaced by "/Core/import"
     d = v3_0_1.SpdxDocument()
     assert hasattr(
         d, "import_"
-    ), "'import_' (import) attribute is missing from 'SpdxDocument'"
+    ), "3.0.1: 'import_' (import) property is missing from 'SpdxDocument'"
 
-    # "parameters" replaced by "parameter" in 3.0.1
+    # 3.0.1: "/Build/parameters" replaced by "Build/parameter"
     b = v3_0_1.build_Build()
     assert hasattr(
         b, "build_parameter"
-    ), "'build_parameter' attribute is missing from 'build_Build'"
+    ), "3.0.1: 'build_parameter' property is missing from 'build_Build'"
     assert not hasattr(
         b, "build_parameters"
-    ), "'build_parameters' attribute should not be presented in 'build_Build'"
+    ), "3.0.1: 'build_parameters' attribute should not be presented in 'build_Build'"
+
+    # 3.0.1: "/Software/contentType" removed (duplicate of "/Core/contentType")
+    f = v3_0_1.software_File()
+    assert hasattr(
+        f, "contentType"
+    ), "3.0.1: 'contentType' property is missing from 'software_File'"
+    assert not hasattr(
+        f, "software_contentType"
+    ), "3.0.1: 'software_contentType' attribute should not be presented in 'software_File'"
 
     p = v3_0_1.ai_AIPackage()
     assert hasattr(
         p, "ai_domain"
-    ), "'ai_domain' attribute is missing from 'ai_AIPackage'"
+    ), "3.0.1: 'ai_domain' property is missing from 'ai_AIPackage'"
+
+
+def test_vocab_entry_exist():
+    """
+    Test the existence of specific vocabulary entries in SPDX versions
+
+    Based on the change log:
+    https://github.com/spdx/spdx-3-model/blob/develop/CHANGELOG.md
+    """
+
+    from spdx_python_model import v3_0_1
+
+    # 3.0.1: "adler32" added to "/Core/HashAlgorithm"
+    h = v3_0_1.HashAlgorithm()
+    assert hasattr(
+        h, "adler32"
+    ), "3.0.1: 'adler32' entry is missing from 'HashAlgorithm'"
+
+    # 3.0.1: "hasPrerequsite" (misspelled) replaced by "hasPrerequisite"
+    r = v3_0_1.RelationshipType()
+    assert not hasattr(
+        r, "hasPrerequsite"
+    ), "3.0.1: 'hasPrerequsite' (misspelled) entry should not be presented in 'RelationshipType'"
+
+
+def test_special_individual_exist():
+    """
+    Test the existence of specific individuals in SPDX versions
+
+    Based on the change log:
+    https://github.com/spdx/spdx-3-model/blob/develop/CHANGELOG.md
+    """
+
+    from spdx_python_model import v3_0_1
+
+    # 3.0.1: "SpdxOrganization" added
+    o = v3_0_1.Organization()
+    assert (
+        "SpdxOrganization" in o.NAMED_INDIVIDUALS
+    ), "3.0.1: 'SpdxOrganization' is missing"
