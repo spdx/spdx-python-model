@@ -1,4 +1,4 @@
-# SPDX_License-FileType: SOURCE
+# SPDX-FileType: SOURCE
 # SPDX-License-Identifier: Apache-2.0
 
 
@@ -9,9 +9,9 @@ def test_import():
 
 
 def test_import_rename():
-    from spdx_python_model import v3_0_1 as spdx_3_0_1
+    from spdx_python_model import v3_0_1 as spdx_3_0
 
-    p = spdx_3_0_1.Person()
+    p = spdx_3_0.Person()
 
 
 def test_version():
