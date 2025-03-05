@@ -21,6 +21,12 @@ def test_version():
 
 
 def test_property_exist():
+    """
+    Test the existence of specific properties in SPDX versions
+
+    Based on the change log:
+    https://github.com/spdx/spdx-3-model/blob/develop/CHANGELOG.md
+    """
     from spdx_python_model import v3_0_1
 
     # "imports" replaced by "import" in 3.0.1
