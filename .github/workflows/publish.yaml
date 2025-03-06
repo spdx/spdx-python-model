@@ -33,6 +33,5 @@ jobs:
       - name: Build package
         run: python -m build
 
-# Uncomment this once we have a PyPi repo
-#      - name: Publish distribution to PyPI
-#        uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Publish distribution to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
