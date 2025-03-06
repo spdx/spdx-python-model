@@ -15,7 +15,9 @@ doesn't yet support SPDX 3)
 
 ## Installation (PyPi)
 
-**TODO** Add instructions for how to install these from PyPi once they are published there
+```shell
+python3 -m pip install spdx-python-model
+```
 
 ## Installation (Git)
 
@@ -69,8 +71,6 @@ pytest -vx
 ```
 
 ## Making a new release
-
-**NOTE** We do not have a PyPi repo yet, so this won't work
 
 To make a new release of this repository, bump the version number found in
 `src/spdx_python_model/version.py`, and merge it into the repo. After this,
