@@ -162,3 +162,4 @@ cython_debug/
 
 src/spdx_python_model/bindings/
 gen/*.py
+gen/*.pyi

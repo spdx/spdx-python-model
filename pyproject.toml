@@ -54,5 +54,6 @@ commands = [
     "./generate-bindings"
 ]
 artifacts = [
-    "*.py"
+    "*.py",
+    "*.pyi",
 ]
