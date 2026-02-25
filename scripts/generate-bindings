@@ -1,0 +1,108 @@
+#! /usr/bin/env python3
+#
+# SPDX-License-Identifier: Apache-2.0
+
+
+import argparse
+import sys
+import requests
+import subprocess
+import re
+import os
+from pathlib import Path
+
+SPDX_VERSIONS = ("3.0.1",)
+
+THIS_DIR = Path(__file__).parent
+OUT_DIR = THIS_DIR.parent / "gen"
+
+INIT_FILE_PATH = OUT_DIR / "__init__.py"
+
+
+def download_url(when, session, url, output):
+    if output.exists():
+        if when in ("if-missing", "never"):
+            print(f"File {output} already exists, skipping download.")
+            return
+    elif when == "never":
+        raise FileNotFoundError(
+            f"File {output} does not exist and download is disabled."
+        )
+
+    print(f"Downloading {url} to {output}...")
+    response = session.get(url)
+    response.raise_for_status()
+    with output.open("wb") as f:
+        f.write(response.content)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="Generate SPDX Python bindings from RDF SHACL model"
+    )
+    parser.add_argument(
+        "--download",
+        choices=("always", "never", "if-missing"),
+        default=os.environ.get("SPDX_PYTHON_MODEL_DOWNLOAD", "if-missing"),
+        help="Controls how model files are downloaded. 'always' will force downloading files, 'never' will never download files, 'if-missing' will download the files if they do not already exits. Default is '%(default)s'",
+    )
+    args = parser.parse_args()
+
+    OUT_DIR.mkdir(parents=True, exist_ok=True)
+
+    with INIT_FILE_PATH.open("w") as init_file, requests.Session() as session:
+        init_file.write("# Import all versions\n")
+
+        for version in SPDX_VERSIONS:
+            modname = "v" + re.sub(r"[^a-zA-Z0-9_]", "_", version)
+            dl_dir = OUT_DIR / "download" / version
+            dl_dir.mkdir(parents=True, exist_ok=True)
+
+            context_url = f"https://spdx.org/rdf/{version}/spdx-context.jsonld"
+
+            download_url(
+                args.download,
+                session,
+                context_url,
+                dl_dir / "context.jsonld",
+            )
+            download_url(
+                args.download,
+                session,
+                f"https://spdx.org/rdf/{version}/spdx-model.ttl",
+                dl_dir / "model.ttl",
+            )
+            download_url(
+                args.download,
+                session,
+                f"https://spdx.org/rdf/{version}/spdx-json-serialize-annotations.ttl",
+                dl_dir / "annotations.ttl",
+            )
+            p = subprocess.run(
+                [
+                    "shacl2code",
+                    "generate",
+                    "--input",
+                    dl_dir / "model.ttl",
+                    "--input",
+                    dl_dir / "annotations.ttl",
+                    "--context-url",
+                    dl_dir / "context.jsonld",
+                    context_url,
+                    "--license",
+                    "Apache-2.0",
+                    "python",
+                    "-o",
+                    OUT_DIR / f"{modname}.py",
+                ]
+            )
+            if p.returncode != 0:
+                return p.returncode
+
+            init_file.write(f"from . import {modname}\n")
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

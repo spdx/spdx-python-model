@@ -161,4 +161,6 @@ cython_debug/
 #.idea/
 
 src/spdx_python_model/bindings/
-gen/*.py
+gen/**/*
+!gen/.keep
+

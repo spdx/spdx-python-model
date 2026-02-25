@@ -23,6 +23,7 @@ license = "Apache-2.0"
 [project.optional-dependencies]
 dev = [
     "pytest >= 7.4",
+    "requests == 2.32.5",
 ]
 
 [project.urls]
@@ -35,6 +36,7 @@ requires = [
     "hatchling",
     "hatch-build-scripts",
     "shacl2code == 0.0.25",
+    "requests == 2.32.5",
 ]
 build-backend = "hatchling.build"
 
@@ -51,7 +53,7 @@ out_dir = "src/spdx_python_model/bindings"
 work_dir = "gen"
 clean_out_dir = true
 commands = [
-    "./generate-bindings"
+    "../scripts/generate-bindings"
 ]
 artifacts = [
     "*.py"
