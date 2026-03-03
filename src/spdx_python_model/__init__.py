@@ -3,6 +3,7 @@
 #
 """
 .. include:: ../../README.md
+   :end-before: Testing
 """
 
 from .bindings import *
