@@ -1,6 +1,6 @@
 # spdx-python-model
 
-Generated Python code for SPDX Spec version 3
+Generated Python code for [SPDX specification version 3][spdx-spec].
 
 All bindings in this repository are generated using
 [shacl2code](https://github.com/JPEWdev/shacl2code) at the time the package is
@@ -79,3 +79,5 @@ matches the version number specified in `version.py` (e.g. `v1.0.0`).
 
 After this, GitHub actions will do the rest to build the package and publish it
 to PyPi
+
+[spdx-spec]: https://spdx.org/specifications
