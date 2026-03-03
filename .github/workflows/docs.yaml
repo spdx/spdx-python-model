@@ -51,7 +51,7 @@ jobs:
         env:
           VERSION: ${{ env.VERSION }}
         run: |
-          pdoc --html src/spdx_python_model -o docs
+          pdoc src/spdx_python_model -o docs
           # Copy files to versioned/dev directory
           mkdir -p "pages/${{ env.VERSION }}"
           cp -r docs/* "pages/${{ env.VERSION }}/"
