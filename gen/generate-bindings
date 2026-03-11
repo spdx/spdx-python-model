@@ -21,14 +21,14 @@ for v in $SPDX_VERSIONS; do
             --context-url "file://${SHACL2CODE_SPDX_DIR}/$v/spdx-context.jsonld" https://spdx.org/rdf/$v/spdx-context.jsonld  \
             --license Apache-2.0 \
             python \
-            -o "$MODNAME.py"
+            --output "$MODNAME"
     else
         shacl2code generate --input https://spdx.org/rdf/$v/spdx-model.ttl \
             --input https://spdx.org/rdf/$v/spdx-json-serialize-annotations.ttl \
             --context https://spdx.org/rdf/$v/spdx-context.jsonld \
             --license Apache-2.0 \
             python \
-            -o "$MODNAME.py"
+            --output "$MODNAME"
     fi
 
     echo "from . import $MODNAME" >> __init__.py
