@@ -11,21 +11,26 @@ mkdir -p "gen"
 
 echo "# Import all versions" > __init__.py
 
+get_context_url() {
+    echo "https://spdx.org/rdf/$1/spdx-context.jsonld"
+}
+
 for v in $SPDX_VERSIONS; do
     MODNAME="v$(echo "$v" | sed 's/[^a-zA-Z0-9_]/_/g')"
 
+    CONTEXT_URL="$(get_context_url "$v")"
     if [ -n "${SHACL2CODE_SPDX_DIR}" ] && [ -d "${SHACL2CODE_SPDX_DIR}/$v" ]
     then
         shacl2code generate --input "file://${SHACL2CODE_SPDX_DIR}/$v/spdx-model.ttl" \
             --input "file://${SHACL2CODE_SPDX_DIR}/$v/spdx-json-serialize-annotations.ttl" \
-            --context-url "file://${SHACL2CODE_SPDX_DIR}/$v/spdx-context.jsonld" https://spdx.org/rdf/$v/spdx-context.jsonld  \
+            --context-url "file://${SHACL2CODE_SPDX_DIR}/$v/spdx-context.jsonld" $CONTEXT_URL \
             --license Apache-2.0 \
             python \
             --output "$MODNAME"
     else
         shacl2code generate --input https://spdx.org/rdf/$v/spdx-model.ttl \
             --input https://spdx.org/rdf/$v/spdx-json-serialize-annotations.ttl \
-            --context https://spdx.org/rdf/$v/spdx-context.jsonld \
+            --context $CONTEXT_URL \
             --license Apache-2.0 \
             python \
             --output "$MODNAME"
@@ -33,3 +38,16 @@ for v in $SPDX_VERSIONS; do
 
     echo "from . import $MODNAME" >> __init__.py
 done
+
+MODNAME=""
+CONTEXT_URL=""
+
+echo >> __init__.py
+echo "# Generate context table" >> __init__.py
+echo "_CONTEXT_TABLE = {" >> __init__.py
+for v in $SPDX_VERSIONS; do
+    MODNAME="v$(echo "$v" | sed 's/[^a-zA-Z0-9_]/_/g')"
+    CONTEXT_URL="$(get_context_url "$v")"
+    echo "    '$CONTEXT_URL': $MODNAME" >> __init__.py
+done
+echo "}" >> __init__.py
