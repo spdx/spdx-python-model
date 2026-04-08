@@ -36,7 +36,7 @@ Issues = "https://github.com/spdx/spdx-python-model/issues"
 requires = [
     "hatchling >= 1.27.0",
     "hatch-build-scripts >= 0.0.4",
-    "shacl2code == 1.0.0",
+    "shacl2code == 1.0.1",
 ]
 build-backend = "hatchling.build"
 
