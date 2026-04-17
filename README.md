@@ -1,6 +1,6 @@
 # spdx-python-model
 
-Generated Python code for SPDX Spec version 3
+Generated Python code for [SPDX specification version 3][spdx-spec].
 
 All bindings in this repository are generated using
 [shacl2code](https://github.com/JPEWdev/shacl2code) at the time the package is
@@ -13,7 +13,9 @@ higher level approach, please see the
 [SPDX Python Tools](https://github.com/spdx/tools-python) (however this repo
 doesn't yet support SPDX 3)
 
-## Installation (PyPi)
+[spdx-spec]: https://spdx.org/specifications
+
+## Installation (PyPI)
 
 ```shell
 python3 -m pip install spdx-python-model
@@ -22,7 +24,7 @@ python3 -m pip install spdx-python-model
 ## Installation (Git)
 
 If you would like to pull the bindings directly from Git instead of using a
-released version from PyPi, the following command can be used:
+released version from PyPI, the following command can be used:
 
 ```shell
 python3 -m pip install git+https://github.com/spdx/spdx-python-model.git@main
@@ -78,4 +80,4 @@ make a new release in GitHub with the name `v` + *VERSION*, where *VERSION*
 matches the version number specified in `version.py` (e.g. `v1.0.0`).
 
 After this, GitHub actions will do the rest to build the package and publish it
-to PyPi
+to PyPI.
