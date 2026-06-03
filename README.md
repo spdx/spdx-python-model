@@ -52,6 +52,19 @@ from spdx_python_model import v3_0_1 as spdx_3_0
 p = spdx_3_0.Person()
 ```
 
+You can also have the bindings automatically detect the correct version to use
+using the `load()` API:
+
+```python
+import spdx_python_model
+
+path = Path("/path/to/file.spdx3.json")
+
+model, objset = spdx_python_model.load(path)
+
+p = model.Person()
+```
+
 ## Testing
 
 This repository has support for running tests against the bindings using `pytest`.

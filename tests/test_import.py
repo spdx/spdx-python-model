@@ -110,3 +110,15 @@ def test_exist_vocab_entry():
     assert not hasattr(
         r, "hasOutputs"
     ), "3.0.1: 'hasOutputs' entry should not be presented in 'RelationshipType'"
+
+
+def test_direct_create():
+    import spdx_python_model
+
+    p = spdx_python_model.v3_0_1.Person()
+
+
+def test_alias():
+    from spdx_python_model import v3_0_1 as spdx
+
+    p = spdx.Person()
