@@ -7,9 +7,9 @@
 
 
 def test_import():
-    from spdx_python_model import v3_0_1
+    import spdx_python_model
 
-    p = v3_0_1.Person()
+    p = spdx_python_model.v3_0_1.Person()
 
 
 def test_import_rename():
