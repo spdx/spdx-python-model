@@ -15,7 +15,7 @@ from .version import VERSION
 if TYPE_CHECKING:
     # Generated re-exports to give type checkers version types.
     # No imported during runtime.
-    from .bindings._reexport import *  # noqa: F401,F403  # pylint: disable=wildcard-import
+    from .bindings._reexport import *  # noqa: F403
 
 __all__ = ["VERSION", "LoadError", "load", "load_data"]
 

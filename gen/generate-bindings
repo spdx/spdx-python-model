@@ -71,11 +71,11 @@ done
     echo '"""Type-checking-only re-exports so ``spdx_python_model.vX`` types resolve.'
     echo
     echo 'Imported under TYPE_CHECKING only; the runtime loads versions lazily via the'
-    echo 'package __getattr__. The redundant ``as`` aliases satisfy --no-implicit-reexport.'
+    echo 'package __getattr__. __all__ marks the names as re-exports for --no-implicit-reexport.'
     echo '"""'
     for v in $SPDX_VERSIONS; do
         MODNAME="v$(echo "$v" | sed 's/[^a-zA-Z0-9_]/_/g')"
-        echo "from . import $MODNAME as $MODNAME  # pylint: disable=useless-import-alias"
+        echo "from . import $MODNAME"
     done
     echo
     echo '__all__ = ['
