@@ -24,6 +24,8 @@ license = "Apache-2.0"
 
 [project.optional-dependencies]
 dev = [
+    "mypy >= 1.19.1",
+    "pylint >= 3.3.9",
     "pytest >= 7.4",
 ]
 
@@ -36,7 +38,7 @@ Issues = "https://github.com/spdx/spdx-python-model/issues"
 requires = [
     "hatchling >= 1.27.0",
     "hatch-build-scripts >= 0.0.4",
-    "shacl2code == 1.0.1",
+    "shacl2code == 1.1.0",
 ]
 build-backend = "hatchling.build"
 
@@ -47,6 +49,14 @@ path = "src/spdx_python_model/version.py"
 addopts = [
     "--import-mode=importlib",
 ]
+
+[tool.mypy]
+python_version = "3.9"
+strict = true
+
+[tool.pylint.main]
+# The generated binding fails style checks. Ignore it.
+ignore-paths = ['^src/spdx_python_model/bindings/v3_0_1/.*$']
 
 [[tool.hatch.build.hooks.build-scripts.scripts]]
 out_dir = "src/spdx_python_model/bindings"

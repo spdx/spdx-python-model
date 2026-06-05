@@ -7,9 +7,9 @@
 
 
 def test_import():
-    import spdx_python_model
+    from spdx_python_model import v3_0_1
 
-    p = spdx_python_model.v3_0_1.Person()
+    p = v3_0_1.Person()
 
 
 def test_import_rename():
@@ -119,6 +119,28 @@ def test_direct_create():
 
 
 def test_alias():
-    from spdx_python_model import v3_0_1 as spdx
+    # The eager path under spdx_python_model.bindings stays available too.
+    from spdx_python_model.bindings import v3_0_1 as spdx
 
     p = spdx.Person()
+
+
+def test_lazy_import():
+    """Importing the package must not eagerly load any version bindings."""
+    import importlib
+    import sys
+
+    for mod in list(sys.modules):
+        if mod.startswith("spdx_python_model"):
+            del sys.modules[mod]
+
+    importlib.import_module("spdx_python_model")
+    assert not any(
+        m.startswith("spdx_python_model.bindings.v") for m in sys.modules
+    ), "no version bindings should be loaded on 'import spdx_python_model'"
+
+    # Accessing a version triggers a lazy import of just that version.
+    import spdx_python_model
+
+    assert spdx_python_model.v3_0_1 is not None
+    assert "spdx_python_model.bindings.v3_0_1" in sys.modules
