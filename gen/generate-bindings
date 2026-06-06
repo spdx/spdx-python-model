@@ -14,8 +14,6 @@ get_context_url() {
     echo "https://spdx.org/rdf/$1/spdx-context.jsonld"
 }
 
-mkdir -p "gen"
-
 # Generate the per-version bindings with shacl2code.
 # Each version ends up in its own subpackage (e.g. "v3_0_1").
 for v in $SPDX_VERSIONS; do
