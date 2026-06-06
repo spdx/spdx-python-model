@@ -8,6 +8,14 @@ authors = [
     {name = "Joshua Watt", email = "JPEWhacker@gmail.com"},
 ]
 readme = "README.md"
+keywords = [
+    "spdx",
+    "sbom",
+    "spdx3",
+    "software-bill-of-materials",
+    "shacl2code",
+    "bindings",
+]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
