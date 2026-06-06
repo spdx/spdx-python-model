@@ -55,15 +55,16 @@ def load_data(data: Any) -> Tuple[ModuleType, Any]:
     if not isinstance(data, dict):
         raise TypeError("Data must be a dictionary")
 
-    if "@context" not in data:
+    context = data.get("@context")
+    if not context:
         raise LoadError("No @context in data")
 
     context_url = None
 
-    if isinstance(data["@context"], str):
-        context_url = data["@context"]
-    elif isinstance(data["@context"], list):
-        for item in data["@context"]:
+    if isinstance(context, str):
+        context_url = context
+    elif isinstance(context, list):
+        for item in context:
             if isinstance(item, str):
                 context_url = item
                 break
@@ -71,10 +72,11 @@ def load_data(data: Any) -> Tuple[ModuleType, Any]:
     if not context_url:
         raise LoadError("No valid @context URL string found in data")
 
-    if context_url not in _CONTEXT_TABLE:
+    module_name = _CONTEXT_TABLE.get(context_url)
+    if module_name is None:
         raise LoadError(f"Unknown context URL '{context_url}'")
 
-    model = importlib.import_module(f"{__name__}.bindings.{_CONTEXT_TABLE[context_url]}")
+    model = importlib.import_module(f"{__name__}.bindings.{module_name}")
 
     d = model.JSONLDDeserializer()
     objset = model.SHACLObjectSet()
