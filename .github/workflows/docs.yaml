@@ -1,0 +1,73 @@
+---
+name: Publish API documentation to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  deploy-docs:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+
+      - name: Install dependencies
+        run: pip install .
+
+      - name: Install pdoc
+        run: pip install pdoc
+
+      - name: Get version
+        id: get_version
+        run: |
+          if [[ "${{ github.event_name }}" == "release" ]]; then
+            VERSION_RAW="${{ github.event.release.tag_name }}"
+            echo "VERSION=${VERSION_RAW#v}" >> $GITHUB_ENV
+          else
+            echo "VERSION=dev" >> $GITHUB_ENV
+          fi
+
+      - name: Build docs
+        env:
+          VERSION: ${{ env.VERSION }}
+        run: |
+          pdoc src/spdx_python_model -o docs
+          # Copy files to versioned/dev directory
+          mkdir -p "pages/${{ env.VERSION }}"
+          cp -r docs/* "pages/${{ env.VERSION }}/"
+          # Create an index.html to redirect to the dev docs
+          if [[ "${{ env.VERSION }}" == "dev" ]]; then
+            echo '<meta http-equiv="refresh" content="0; url=dev/" />' > pages/index.html
+          fi
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: pages
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

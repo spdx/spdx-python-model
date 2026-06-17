@@ -1,6 +1,6 @@
 # spdx-python-model
 
-Generated Python code for SPDX Spec version 3
+Generated Python code for [SPDX specification version 3][spdx-spec].
 
 All bindings in this repository are generated using
 [shacl2code](https://github.com/JPEWdev/shacl2code) at the time the package is
@@ -10,8 +10,10 @@ built.
 manipulating SPDX files. While they are fully functions, they lack higher level
 helper functions that may be useful for creating SPDX documents. If you want a
 higher level approach, please see the
-[SPDX Python Tools](https://github.com/spdx/tools-python) (however this repo
+[SPDX Python Tools](https://github.com/spdx/tools-python) (however, it
 doesn't yet support SPDX 3)
+
+[spdx-spec]: https://spdx.org/specifications
 
 ## Installation
 
@@ -31,7 +33,7 @@ python3 -m pip install git+https://github.com/spdx/spdx-python-model.git@main
 ```
 
 Note that this will pull the latest version from the `main` branch. If you want
-a specific commit, replace `main` with the git commit SHA
+a specific commit, replace `main` with the git commit SHA.
 
 ### Install/build using local SPDX model files
 
