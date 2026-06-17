@@ -10,18 +10,20 @@ built.
 manipulating SPDX files. While they are fully functions, they lack higher level
 helper functions that may be useful for creating SPDX documents. If you want a
 higher level approach, please see the
-[SPDX Python Tools](https://github.com/spdx/tools-python) (however this repo
+[SPDX Python Tools](https://github.com/spdx/tools-python) (however, it
 doesn't yet support SPDX 3)
 
 [spdx-spec]: https://spdx.org/specifications
 
-## Installation (PyPI)
+## Installation
+
+### Install from PyPI
 
 ```shell
 python3 -m pip install spdx-python-model
 ```
 
-## Installation (Git)
+### Install from Git
 
 If you would like to pull the bindings directly from Git instead of using a
 released version from PyPI, the following command can be used:
@@ -31,7 +33,70 @@ python3 -m pip install git+https://github.com/spdx/spdx-python-model.git@main
 ```
 
 Note that this will pull the latest version from the `main` branch. If you want
-a specific commit, replace `main` with the git commit SHA
+a specific commit, replace `main` with the git commit SHA.
+
+### Install/build using local SPDX model files
+
+Using local SPDX model files is ideal for testing pre-release versions
+or when official URLs are not yet live.
+
+It is also required for build systems that prohibit network access during
+packaging, such as Debian or Yocto.
+
+To build using local model files:
+
+1) Clone the repository:
+
+    ```shell
+    git clone https://github.com/spdx/spdx-python-model.git
+    cd spdx-python-model
+    ```
+
+2) Download model files:
+
+    Run the following commands to download the necessary files
+    for a specific SPDX version and keep it in a local directory:
+
+    ```shell
+    mkdir -p ~/spdx_models/v3.0.1
+    cd ~/spdx_models/v3.0.1
+    wget https://spdx.org/rdf/3.0.1/spdx-context.jsonld
+    wget https://spdx.org/rdf/3.0.1/spdx-json-serialize-annotations.ttl
+    wget https://spdx.org/rdf/3.0.1/spdx-model.ttl
+    ```
+
+    Or use your own model files.
+
+    The local directory must be organized by SPDX version,
+    with specific file names.
+
+    ```text
+    <SHACL2CODE_SPDX_DIR>/
+    └── v[VERSION]/
+        ├── spdx-context.jsonld
+        ├── spdx-json-serialize-annotations.ttl
+        └── spdx-model.ttl
+    ```
+
+3) Set the model directory:
+
+    Point `SHACL2CODE_SPDX_DIR` environment variable to that local directory.
+
+    ```shell
+    export SHACL2CODE_SPDX_DIR=~/spdx_models
+    ```
+
+4) Install/build:
+
+    ```shell
+    python3 -m pip install .
+    ```
+
+    or
+
+    ```shell
+    python3 -m build
+    ```
 
 ## Usage
 
@@ -52,6 +117,19 @@ with another name:
 from spdx_python_model import v3_0_1 as spdx_3_0
 
 p = spdx_3_0.Person()
+```
+
+You can also have the bindings automatically detect the correct version to use
+using the `load()` API:
+
+```python
+import spdx_python_model
+
+path = Path("/path/to/file.spdx3.json")
+
+model, objset = spdx_python_model.load(path)
+
+p = model.Person()
 ```
 
 ## Testing

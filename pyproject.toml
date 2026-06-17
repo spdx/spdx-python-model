@@ -8,6 +8,14 @@ authors = [
     {name = "Joshua Watt", email = "JPEWhacker@gmail.com"},
 ]
 readme = "README.md"
+keywords = [
+    "spdx",
+    "sbom",
+    "spdx3",
+    "software-bill-of-materials",
+    "shacl2code",
+    "bindings",
+]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
@@ -24,6 +32,8 @@ license = "Apache-2.0"
 
 [project.optional-dependencies]
 dev = [
+    "mypy >= 1.19.1",
+    "pylint >= 3.3.9",
     "pytest >= 7.4",
 ]
 
@@ -34,19 +44,11 @@ Issues = "https://github.com/spdx/spdx-python-model/issues"
 
 [build-system]
 requires = [
-    "hatchling",
-    "hatch-build-scripts",
-    "shacl2code == 0.0.25",
+    "hatchling >= 1.27.0",
+    "hatch-build-scripts >= 0.0.4",
+    "shacl2code == 1.1.0",
 ]
 build-backend = "hatchling.build"
-
-[tool.hatch.version]
-path = "src/spdx_python_model/version.py"
-
-[tool.pytest.ini_options]
-addopts = [
-    "--import-mode=importlib",
-]
 
 [[tool.hatch.build.hooks.build-scripts.scripts]]
 out_dir = "src/spdx_python_model/bindings"
@@ -59,3 +61,24 @@ artifacts = [
     "*.py",
     "*.pyi",
 ]
+
+[tool.hatch.version]
+path = "src/spdx_python_model/version.py"
+
+[tool.mypy]
+disallow_any_decorated = true
+disallow_any_unimported = true
+extra_checks = true
+python_version = "3.9"
+strict = true
+strict_bytes = true
+warn_unreachable = true
+
+[tool.pytest.ini_options]
+addopts = [
+    "--import-mode=importlib",
+]
+
+[tool.pylint.main]
+# The generated binding fails style checks. Ignore it.
+ignore-paths = ['^src/spdx_python_model/bindings/v3_0_1/.*$']
