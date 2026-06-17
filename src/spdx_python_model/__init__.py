@@ -1,21 +1,45 @@
-#
+# SPDX-FileType: SOURCE
 # SPDX-License-Identifier: Apache-2.0
 #
+"""SPDX 3 model."""
 
-from .bindings import *
-from .version import VERSION
+import importlib
+import json
+from pathlib import Path
+from types import ModuleType
+from typing import TYPE_CHECKING, Any, List, Tuple
 
 from .bindings import _CONTEXT_TABLE
+from .version import VERSION
+from .version import VERSION as __version__
 
-from pathlib import Path
-import json
+if TYPE_CHECKING:
+    # Generated re-exports to give type checkers version types.
+    # No imported during runtime.
+    from .bindings._reexport import *  # noqa: F403
+
+__all__ = ["LoadError", "VERSION", "__version__", "load", "load_data"]
+
+# Version submodule names accepted by __getattr__ for top-level import.
+_VERSION_MODULES = frozenset(_CONTEXT_TABLE.values())
 
 
 class LoadError(Exception):
-    pass
+    """Raised when a SPDX document cannot be loaded."""
 
 
-def load_data(data):
+def __getattr__(name: str) -> ModuleType:
+    """Lazily import a version's bindings on first top-level access (PEP 562)."""
+    if name in _VERSION_MODULES:
+        return importlib.import_module(f"{__name__}.bindings.{name}")
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
+
+def __dir__() -> List[str]:
+    return sorted(set(globals()) | _VERSION_MODULES)
+
+
+def load_data(data: Any) -> Tuple[ModuleType, Any]:
     """
     Automatically load a SPDX 3 JSON document with the correct model based on
     its context
@@ -32,15 +56,16 @@ def load_data(data):
     if not isinstance(data, dict):
         raise TypeError("Data must be a dictionary")
 
-    if "@context" not in data:
+    context = data.get("@context")
+    if not context:
         raise LoadError("No @context in data")
 
     context_url = None
 
-    if isinstance(data["@context"], str):
-        context_url = data["@context"]
-    elif isinstance(data["@context"], list):
-        for item in data["@context"]:
+    if isinstance(context, str):
+        context_url = context
+    elif isinstance(context, list):
+        for item in context:
             if isinstance(item, str):
                 context_url = item
                 break
@@ -48,10 +73,11 @@ def load_data(data):
     if not context_url:
         raise LoadError("No valid @context URL string found in data")
 
-    if context_url not in _CONTEXT_TABLE:
-        raise LoadError(f"Unknown context URL '{context}'")
+    module_name = _CONTEXT_TABLE.get(context_url)
+    if module_name is None:
+        raise LoadError(f"Unknown context URL '{context_url}'")
 
-    model = _CONTEXT_TABLE[context_url]
+    model = importlib.import_module(f"{__name__}.bindings.{module_name}")
 
     d = model.JSONLDDeserializer()
     objset = model.SHACLObjectSet()
@@ -61,12 +87,12 @@ def load_data(data):
     return model, objset
 
 
-def load(path: Path):
+def load(path: Path) -> Tuple[ModuleType, Any]:
     """
     Automatically load a SPDX 3 JSON document with the correct model based on
     its context
 
-    :param data: The path to the SPDX 3 JSON file
+    :param path: The path to the SPDX 3 JSON file
 
     :returns: A tuple that contains the model and the decoded SHACLObjectSet
 
