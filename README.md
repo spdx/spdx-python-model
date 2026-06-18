@@ -1,4 +1,7 @@
-# spdx-python-model
+# SPDX Python model
+
+[![PyPI - Version](https://img.shields.io/pypi/v/spdx-python-model)](https://pypi.org/project/spdx-python-model/)
+![Apache-2.0 license](https://img.shields.io/github/license/spdx/spdx-python-model)
 
 Generated Python code for [SPDX specification version 3][spdx-spec].
 
