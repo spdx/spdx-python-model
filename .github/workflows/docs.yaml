@@ -4,7 +4,8 @@
 #
 # Publish API docs to
 # https://spdx.github.io/spdx-python-model/doc/stable/ -- latest release
-# https://spdx.github.io/spdx-python-model/doc/dev/ -- from main branch
+# https://spdx.github.io/spdx-python-model/doc/dev/ -- from main branch (unreleased)
+# https://spdx.github.io/spdx-python-model/doc/1.0/ -- for specific version (all 1.0.x will all published to this URL)
 
 name: Publish API docs
 
