@@ -1,4 +1,11 @@
 ---
+# Publish library landing page to
+# https://spdx.github.io/spdx-python-model/
+#
+# Publish API docs to
+# https://spdx.github.io/spdx-python-model/doc/stable/ -- latest release
+# https://spdx.github.io/spdx-python-model/doc/dev/ -- from main branch
+
 name: Publish API docs
 
 on:
@@ -32,7 +39,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Restore existing pages
+      - name: Keep previously published versions
         run: |
           mkdir -p pages
           if git fetch origin gh-pages 2>/dev/null; then
