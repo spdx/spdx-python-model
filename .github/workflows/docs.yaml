@@ -69,8 +69,6 @@ jobs:
 
       - name: Build docs
         run: |
-          VERSION="${{ env.VERSION }}"
-          MAJOR_MINOR="${{ env.MAJOR_MINOR }}"
           OUT="pages/doc/$MAJOR_MINOR"
 
           mkdir -p "$OUT"
@@ -83,14 +81,14 @@ jobs:
             -o "$OUT"
 
           # On release: update stable/ to match this major.minor.
-          if [[ "${{ env.IS_RELEASE }}" == "true" ]]; then
+          if [[ "$IS_RELEASE" == "true" ]]; then
             rm -rf pages/doc/stable
             cp -r "pages/doc/$MAJOR_MINOR" pages/doc/stable
           fi
 
-          # /doc/ redirects to /doc/stable/reference/.
+          # /doc/ redirects to site root.
           mkdir -p pages/doc
-          echo '<meta http-equiv="refresh" content="0; url=stable/" />' > pages/doc/index.html
+          echo '<meta http-equiv="refresh" content="0; url=../" />' > pages/doc/index.html
 
           # Root landing page from repo; fallback to redirect if not present.
           if [[ -f www/index.html ]]; then
