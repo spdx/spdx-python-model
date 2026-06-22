@@ -1,11 +1,7 @@
 # SPDX-FileType: SOURCE
 # SPDX-License-Identifier: Apache-2.0
-#
 """
-SPDX 3 model.
-
-.. include:: ../../README.md
-   :end-before: Testing
+Python bindings for the SPDX 3 data model.
 """
 
 import importlib
@@ -20,10 +16,17 @@ from .version import VERSION as __version__
 
 if TYPE_CHECKING:
     # Generated re-exports to give type checkers version types.
-    # No imported during runtime.
+    # Not imported during runtime.
     from .bindings._reexport import *  # noqa: F403
 
-__all__ = ["LoadError", "VERSION", "__version__", "load", "load_data"]
+__all__ = [
+    "bindings",  # generated # noqa: F405
+    "LoadError",
+    "VERSION",
+    "__version__",
+    "load",
+    "load_data",
+]
 
 # Version submodule names accepted by __getattr__ for top-level import.
 _VERSION_MODULES = frozenset(_CONTEXT_TABLE.values())

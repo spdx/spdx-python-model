@@ -1,38 +1,61 @@
 ---
-name: Publish API documentation to GitHub Pages
+# Publish library landing page to
+# https://spdx.github.io/spdx-python-model/
+#
+# Publish API docs to
+# https://spdx.github.io/spdx-python-model/doc/stable/ -- latest release
+# https://spdx.github.io/spdx-python-model/doc/dev/ -- from main branch (unreleased)
+# https://spdx.github.io/spdx-python-model/doc/1.0/ -- for specific version (all 1.0.x will all published to this URL)
+
+name: Publish API docs
 
 on:
   push:
     branches:
       - main
+    paths:
+      - '.github/workflows/docs.yaml'
+      - 'gen/**'
+      - 'src/**'
+      - 'www/**'
+      - 'README.md'
+      - 'pyproject.toml'
   release:
     types: [published]
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 jobs:
   deploy-docs:
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
 
+      - name: Keep previously published versions
+        run: |
+          mkdir -p pages
+          if git fetch origin gh-pages 2>/dev/null; then
+            git archive origin/gh-pages | tar -x -C pages/
+          fi
+
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
         with:
           python-version: "3.14"
 
       - name: Install dependencies
-        run: pip install .
+        run: pip install -e .
+        # Use editable install (-e) to include the generated binding submodules
+        # into the source tree so pdoc can see them.
 
       - name: Install pdoc
         run: pip install pdoc
@@ -42,32 +65,54 @@ jobs:
         run: |
           if [[ "${{ github.event_name }}" == "release" ]]; then
             VERSION_RAW="${{ github.event.release.tag_name }}"
-            echo "VERSION=${VERSION_RAW#v}" >> $GITHUB_ENV
+            VERSION="${VERSION_RAW#v}"
+            echo "VERSION=$VERSION" >> $GITHUB_ENV
+            echo "MAJOR_MINOR=$(echo "$VERSION" | cut -d. -f1-2)" >> $GITHUB_ENV
+            echo "IS_RELEASE=true" >> $GITHUB_ENV
           else
             echo "VERSION=dev" >> $GITHUB_ENV
+            echo "MAJOR_MINOR=dev" >> $GITHUB_ENV
+            echo "IS_RELEASE=false" >> $GITHUB_ENV
           fi
 
       - name: Build docs
-        env:
-          VERSION: ${{ env.VERSION }}
         run: |
-          pdoc src/spdx_python_model -o docs
-          # Copy files to versioned/dev directory
-          mkdir -p "pages/${{ env.VERSION }}"
-          cp -r docs/* "pages/${{ env.VERSION }}/"
-          # Create an index.html to redirect to the dev docs
-          if [[ "${{ env.VERSION }}" == "dev" ]]; then
-            echo '<meta http-equiv="refresh" content="0; url=dev/" />' > pages/index.html
+          OUT="pages/doc/$MAJOR_MINOR"
+
+          mkdir -p "$OUT"
+
+          # Build API docs into the versioned output directory.
+          pdoc spdx_python_model \
+            --logo "https://raw.githubusercontent.com/spdx/outreach/main/assets/SPDX_Logo/svg/SPDX%20logo%20color.svg" \
+            --logo-link "/spdx-python-model/doc/$MAJOR_MINOR/" \
+            --footer-text "spdx-python-model $VERSION" \
+            -o "$OUT"
+
+          # On release: update stable/ to match this major.minor.
+          if [[ "$IS_RELEASE" == "true" ]]; then
+            rm -rf pages/doc/stable
+            cp -r "pages/doc/$MAJOR_MINOR" pages/doc/stable
+          fi
+
+          # /doc/ redirects to site root.
+          mkdir -p pages/doc
+          echo '<meta http-equiv="refresh" content="0; url=../" />' > pages/doc/index.html
+
+          # Root landing page from repo; fallback to redirect if not present.
+          if [[ -f www/index.html ]]; then
+            cp www/index.html pages/index.html
+          else
+            echo '<meta http-equiv="refresh" content="0; url=doc/stable/" />' > pages/index.html
           fi
 
       - name: Setup Pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: pages
 
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@cd2ce8fcbc39b97be8ca5fce6e763baed58fa128 # v5.0.0
