@@ -1,5 +1,5 @@
 [project]
-name = "spdx_python_model"
+name = "spdx-python-model"
 description = "SPDX Model Python Bindings"
 dynamic = ["version"]
 dependencies = []
@@ -29,6 +29,7 @@ classifiers = [
     "Programming Language :: Python :: 3.14",
 ]
 license = "Apache-2.0"
+license-files = ["LICENSE"]
 
 [project.optional-dependencies]
 dev = [
@@ -38,9 +39,11 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/spdx/spdx-python-model"
-Repository = "https://github.com/spdx/spdx-python-model.git"
-Issues = "https://github.com/spdx/spdx-python-model/issues"
+homepage = "https://spdx.github.io/spdx-python-model/"
+repository = "https://github.com/spdx/spdx-python-model.git"
+download = "https://github.com/spdx/spdx-python-model/releases"
+documentation = "https://spdx.github.io/spdx-python-model/doc/"
+issues = "https://github.com/spdx/spdx-python-model/issues"
 
 [build-system]
 requires = [
