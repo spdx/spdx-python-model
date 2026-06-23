@@ -83,9 +83,7 @@ addopts = [
 ]
 
 [tool.hatch.build.targets.sdist]
-include = [
-    "spdx_model/",
-]
+force-include = {"spdx_model" = "spdx_model"}
 
 [tool.pylint.main]
 # The generated bindings fail style checks. Ignore them.
