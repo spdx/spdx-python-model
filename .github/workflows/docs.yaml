@@ -10,7 +10,7 @@
 # Publish tutorials to
 # https://spdx.github.io/spdx-python-model/tutorial/
 
-name: Publish docs
+name: Publish API docs
 
 on:
   push:
