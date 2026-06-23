@@ -134,6 +134,7 @@ jobs:
               echo '<h1><a href="../">spdx-python-model</a></h1>'
               echo '<h2>Tutorials</h2><ul>'
               for html in pages/tutorial/*.html; do
+                [[ "$(basename "$html")" == "index.html" ]] && continue
                 name=$(basename "$html" .html)
                 echo "<li><a href=\"$name.html\">$name</a> (<a href=\"https://github.com/spdx/spdx-python-model/blob/main/tutorial/$name.ipynb\">download .ipynb</a>)</li>"
               done
