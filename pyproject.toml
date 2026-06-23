@@ -82,6 +82,14 @@ addopts = [
     "--import-mode=importlib",
 ]
 
+[tool.hatch.build.targets.sdist]
+include = [
+    "spdx/",
+]
+
 [tool.pylint.main]
-# The generated binding fails style checks. Ignore it.
-ignore-paths = ['^src/spdx_python_model/bindings/v3_0_1/.*$']
+# The generated bindings fail style checks. Ignore them.
+ignore-paths = [
+    '^src/spdx_python_model/bindings/v3_0_1/.*$',
+    '^src/spdx_python_model/bindings/v3_1/.*$',
+]
