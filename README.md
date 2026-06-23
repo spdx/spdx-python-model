@@ -135,6 +135,11 @@ model, objset = spdx_python_model.load(path)
 p = model.Person()
 ```
 
+Check out this short [Python notebook tutorial][tutorial]
+to get started with spdx-python-model.
+
+[tutorial]: https://spdx.github.io/spdx-python-model/tutorial/using-spdx3.html
+
 ## Testing
 
 This repository has support for running tests against the bindings using `pytest`.

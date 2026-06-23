@@ -6,8 +6,11 @@
 # https://spdx.github.io/spdx-python-model/doc/stable/ -- latest release
 # https://spdx.github.io/spdx-python-model/doc/dev/ -- from main branch (unreleased)
 # https://spdx.github.io/spdx-python-model/doc/1.0/ -- for specific version (all 1.0.x will all published to this URL)
+#
+# Publish tutorials to
+# https://spdx.github.io/spdx-python-model/tutorial/
 
-name: Publish API docs
+name: Publish docs
 
 on:
   push:
@@ -17,6 +20,7 @@ on:
       - '.github/workflows/docs.yaml'
       - 'gen/**'
       - 'src/**'
+      - 'tutorial/**'
       - 'www/**'
       - 'README.md'
       - 'pyproject.toml'
@@ -60,8 +64,10 @@ jobs:
       - name: Install pdoc
         run: pip install pdoc
 
+      - name: Install nbconvert
+        run: pip install nbconvert
+
       - name: Get version
-        id: get_version
         run: |
           if [[ "${{ github.event_name }}" == "release" ]]; then
             VERSION_RAW="${{ github.event.release.tag_name }}"
@@ -75,13 +81,20 @@ jobs:
             echo "IS_RELEASE=false" >> $GITHUB_ENV
           fi
 
-      - name: Build docs
+      - name: Build landing page
+        run: |
+          if [[ -f www/index.html ]]; then
+            cp www/index.html pages/index.html
+          else
+            echo '<meta http-equiv="refresh" content="0; url=doc/stable/" />' > pages/index.html
+          fi
+
+      - name: Build API docs
         run: |
           OUT="pages/doc/$MAJOR_MINOR"
 
           mkdir -p "$OUT"
 
-          # Build API docs into the versioned output directory.
           pdoc spdx_python_model \
             --logo "https://raw.githubusercontent.com/spdx/outreach/main/assets/SPDX_Logo/svg/SPDX%20logo%20color.svg" \
             --logo-link "/spdx-python-model/doc/$MAJOR_MINOR/" \
@@ -98,11 +111,35 @@ jobs:
           mkdir -p pages/doc
           echo '<meta http-equiv="refresh" content="0; url=../" />' > pages/doc/index.html
 
-          # Root landing page from repo; fallback to redirect if not present.
-          if [[ -f www/index.html ]]; then
-            cp www/index.html pages/index.html
-          else
-            echo '<meta http-equiv="refresh" content="0; url=doc/stable/" />' > pages/index.html
+      - name: Build tutorials
+        run: |
+          if [[ ! -d tutorial ]]; then
+            exit 0
+          fi
+
+          mkdir -p pages/tutorial
+
+          for nb in tutorial/*.ipynb; do
+            jupyter nbconvert --to html --output-dir pages/tutorial "$nb"
+          done
+
+          # Generate /tutorial/ index listing all tutorials.
+          if [[ ! -f tutorial/index.html ]]; then
+            {
+              echo '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">'
+              echo '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
+              echo '<title>Tutorials - spdx-python-model</title>'
+              echo '<style>body{font-family:system-ui,sans-serif;max-width:640px;margin:4rem auto;padding:0 1.5rem;color:#222}a{color:#0969da}li{margin-bottom:.5rem}</style>'
+              echo '</head><body>'
+              echo '<h1><a href="../">spdx-python-model</a></h1>'
+              echo '<h2>Tutorials</h2><ul>'
+              for html in pages/tutorial/*.html; do
+                [[ "$(basename "$html")" == "index.html" ]] && continue
+                name=$(basename "$html" .html)
+                echo "<li><a href=\"$name.html\">$name</a> (<a href=\"https://github.com/spdx/spdx-python-model/blob/main/tutorial/$name.ipynb\">download .ipynb</a>)</li>"
+              done
+              echo '</ul></body></html>'
+            } > pages/tutorial/index.html
           fi
 
       - name: Setup Pages
