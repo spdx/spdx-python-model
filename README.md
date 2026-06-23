@@ -1,20 +1,23 @@
-# SPDX Python model
+# spdx-python-model
 
 [![PyPI - Version](https://img.shields.io/pypi/v/spdx-python-model)](https://pypi.org/project/spdx-python-model/)
 ![Apache-2.0 license](https://img.shields.io/github/license/spdx/spdx-python-model)
 
-Generated Python code for [SPDX specification version 3][spdx-spec].
+`spdx-python-model` is a Python library for working with the SPDX 3 data model.
 
-All bindings in this repository are generated using
-[shacl2code](https://github.com/JPEWdev/shacl2code) at the time the package is
-built.
+Read the [API documentation](https://spdx.github.io/spdx-python-model/).
+
+All bindings in this repository are auto-generated from the RDF and SHACL
+definitions of the [SPDX specification version 3][spdx-spec] using
+[shacl2code](https://github.com/JPEWdev/shacl2code) during the package build
+process.
 
 **NOTE:** The bindings are pretty low level, intended for more directly
 manipulating SPDX files. While they are fully functions, they lack higher level
 helper functions that may be useful for creating SPDX documents. If you want a
 higher level approach, please see the
 [SPDX Python Tools](https://github.com/spdx/tools-python) (however, it
-doesn't yet support SPDX 3)
+doesn't yet support SPDX 3).
 
 [spdx-spec]: https://spdx.org/specifications
 
