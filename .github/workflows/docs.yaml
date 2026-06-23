@@ -20,6 +20,7 @@ on:
       - '.github/workflows/docs.yaml'
       - 'gen/**'
       - 'src/**'
+      - 'tutorial/**'
       - 'www/**'
       - 'README.md'
       - 'pyproject.toml'
@@ -112,30 +113,29 @@ jobs:
 
       - name: Build tutorials
         run: |
-          if [[ ! -d www/tutorial ]]; then
+          if [[ ! -d tutorial ]]; then
             exit 0
           fi
 
           mkdir -p pages/tutorial
 
-          for nb in www/tutorial/*.ipynb; do
+          for nb in tutorial/*.ipynb; do
             jupyter nbconvert --to html --output-dir pages/tutorial "$nb"
-            cp "$nb" pages/tutorial/
           done
 
           # Generate /tutorial/ index listing all tutorials.
-          if [[ ! -f www/tutorial/index.html ]]; then
+          if [[ ! -f tutorial/index.html ]]; then
             {
               echo '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">'
               echo '<meta name="viewport" content="width=device-width, initial-scale=1.0">'
-              echo '<title>Tutorials – spdx-python-model</title>'
+              echo '<title>Tutorials - spdx-python-model</title>'
               echo '<style>body{font-family:system-ui,sans-serif;max-width:640px;margin:4rem auto;padding:0 1.5rem;color:#222}a{color:#0969da}li{margin-bottom:.5rem}</style>'
               echo '</head><body>'
               echo '<h1><a href="../">spdx-python-model</a></h1>'
               echo '<h2>Tutorials</h2><ul>'
               for html in pages/tutorial/*.html; do
                 name=$(basename "$html" .html)
-                echo "<li><a href=\"$name.html\">$name</a> (<a href=\"$name.ipynb\">download .ipynb</a>)</li>"
+                echo "<li><a href=\"$name.html\">$name</a> (<a href=\"https://github.com/spdx/spdx-python-model/blob/main/tutorial/$name.ipynb\">download .ipynb</a>)</li>"
               done
               echo '</ul></body></html>'
             } > pages/tutorial/index.html
