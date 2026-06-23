@@ -142,6 +142,11 @@ jobs:
             } > pages/tutorial/index.html
           fi
 
+          # File not found (404) page from repo.
+          if [[ -f www/404.html ]]; then
+            cp www/404.html pages/404.html
+          fi
+
       - name: Setup Pages
         uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
 
