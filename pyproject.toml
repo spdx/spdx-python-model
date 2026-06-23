@@ -84,7 +84,7 @@ addopts = [
 
 [tool.hatch.build.targets.sdist]
 include = [
-    "spdx/",
+    "spdx_model/",
 ]
 
 [tool.pylint.main]

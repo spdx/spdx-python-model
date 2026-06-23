@@ -64,8 +64,8 @@ To build using local model files:
     for a specific SPDX version and keep it in a local directory:
 
     ```shell
-    mkdir -p ~/spdx_models/v3.0.1
-    cd ~/spdx_models/v3.0.1
+    mkdir -p ~/spdx_model/3.0.1
+    cd ~/spdx_model/3.0.1
     wget https://spdx.org/rdf/3.0.1/spdx-context.jsonld
     wget https://spdx.org/rdf/3.0.1/spdx-json-serialize-annotations.ttl
     wget https://spdx.org/rdf/3.0.1/spdx-model.ttl
@@ -78,7 +78,7 @@ To build using local model files:
 
     ```text
     <SHACL2CODE_SPDX_DIR>/
-    └── v[VERSION]/
+    └── [VERSION]/
         ├── spdx-context.jsonld
         ├── spdx-json-serialize-annotations.ttl
         └── spdx-model.ttl
@@ -89,7 +89,7 @@ To build using local model files:
     Point `SHACL2CODE_SPDX_DIR` environment variable to that local directory.
 
     ```shell
-    export SHACL2CODE_SPDX_DIR=~/spdx_models
+    export SHACL2CODE_SPDX_DIR=~/spdx_model
     ```
 
 4) Install/build:
