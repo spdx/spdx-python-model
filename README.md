@@ -23,16 +23,15 @@ doesn't yet support SPDX 3).
 
 ## Installation
 
-The SPDX model files are bundled under the `spdx_model/` directory, so builds
-work offline by default. This is also what makes the package buildable on build
-systems that prohibit network access during packaging, such as Debian or Yocto.
+The SPDX model files are bundled under the `spdx_model/` directory.
+This makes the package buildable on build systems that prohibit network
+access during packaging, such as Debian or Yocto.
 
 > **Note:** `v3_1` bindings track the in-development SPDX 3.1 draft and are
-> provided for early testing. They may change without notice until SPDX 3.1 is
-> finalized. Use `v3_0_1` for stable work.
+> provided for early testing. They may change without notice.
 
-To force fetching model files from the network instead of using the bundled
-files, set `SHACL2CODE_SPDX_FORCE_NETWORK=1`.
+To force fetching model files from spdx.org instead of using the bundled files,
+set `SHACL2CODE_SPDX_FORCE_NETWORK=1`.
 
 ### Install from PyPI
 
