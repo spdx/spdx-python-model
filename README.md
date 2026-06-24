@@ -178,3 +178,13 @@ matches the version number specified in `version.py` (e.g. `v1.0.0`).
 
 After this, GitHub actions will do the rest to build the package and publish it
 to PyPI.
+
+### Promoting a draft SPDX version
+
+When an SPDX draft version is finalized, move it from `SPDX_VERSIONS_DRAFT` to
+`SPDX_VERSIONS_RELEASE` in [`gen/generate-bindings`](gen/generate-bindings),
+and refresh its model files under `spdx_model/` from the finalized URLs.
+
+This stops the `SPDXDraftWarning` from being emitted when the version's bindings
+are used. The draft status is determined at build time from this script, not
+from the model files, so it only changes when a new release is published.
