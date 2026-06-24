@@ -65,6 +65,9 @@ artifacts = [
     "*.pyi",
 ]
 
+[tool.hatch.build.targets.sdist]
+force-include = {"spdx_model" = "spdx_model"}
+
 [tool.hatch.version]
 path = "src/spdx_python_model/version.py"
 
@@ -81,9 +84,6 @@ warn_unreachable = true
 addopts = [
     "--import-mode=importlib",
 ]
-
-[tool.hatch.build.targets.sdist]
-force-include = {"spdx_model" = "spdx_model"}
 
 [tool.pylint.main]
 # The generated bindings fail style checks. Ignore them.
