@@ -16,9 +16,9 @@ from .version import VERSION
 from .version import VERSION as __version__
 
 if TYPE_CHECKING:
-    # Generated re-exports to give type checkers version types.
+    # Generated stub re-exports to give type checkers version types.
     # Not imported during runtime.
-    from .bindings._reexport import *  # noqa: F403
+    from .bindings import *  # noqa: F403
 
 __all__ = [
     "bindings",  # generated # noqa: F405
