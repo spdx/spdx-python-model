@@ -118,8 +118,9 @@ done
 } > __init__.py
 
 # Generate bindings/__init__.pyi: stub for the bindings package so that type
-# checkers can resolve both spdx_python_model.bindings.vX and (via the
-# top-level TYPE_CHECKING import) spdx_python_model.vX types.
+# checkers can resolve spdx_python_model.bindings.vX and spdx_python_model.vX
+# types, while the runtime loads versions lazily
+# (imported only under TYPE_CHECKING).
 {
     echo '# SPDX-FileType: SOURCE'
     echo '# SPDX-License-Identifier: Apache-2.0'
@@ -128,11 +129,12 @@ done
     echo '"""Type stub for the bindings package.'
     echo
     echo 'Declares available version submodules so type checkers can resolve'
-    echo '``spdx_python_model.bindings.vX`` imports. Also imported by the top-level'
-    echo '__init__.py under TYPE_CHECKING to expose ``spdx_python_model.vX`` types.'
+    echo '``spdx_python_model.bindings.vX`` imports.'
+    echo 'Also imported by the top-level __init__.py under TYPE_CHECKING'
+    echo 'to expose ``spdx_python_model.vX`` types.'
     echo '__all__ marks the names as re-exports for --no-implicit-reexport.'
     echo '"""'
-    echo 'from typing import Dict, FrozenSet'
+    echo 'from typing import Dict'
     echo
     for v in $SPDX_VERSIONS; do
         MODNAME="v$(echo "$v" | sed 's/[^a-zA-Z0-9_]/_/g')"
@@ -140,7 +142,6 @@ done
     done
     echo
     echo '_CONTEXT_TABLE: Dict[str, str]'
-    echo '_DRAFT_VERSIONS: FrozenSet[str]'
     echo
     echo '__all__ = ['
     for v in $SPDX_VERSIONS; do
