@@ -76,7 +76,6 @@ jobs:
             echo "MAJOR_MINOR=$(echo "$VERSION" | cut -d. -f1-2)" >> $GITHUB_ENV
             echo "IS_RELEASE=true" >> $GITHUB_ENV
           else
-            echo "VERSION=dev" >> $GITHUB_ENV
             echo "MAJOR_MINOR=dev" >> $GITHUB_ENV
             echo "IS_RELEASE=false" >> $GITHUB_ENV
           fi
@@ -91,15 +90,11 @@ jobs:
 
       - name: Build API docs
         run: |
-          OUT="pages/doc/$MAJOR_MINOR"
+          mkdir -p "pages/doc/$MAJOR_MINOR"
 
-          mkdir -p "$OUT"
-
-          pdoc spdx_python_model \
-            --logo "https://raw.githubusercontent.com/spdx/outreach/main/assets/SPDX_Logo/svg/SPDX%20logo%20color.svg" \
-            --logo-link "/spdx-python-model/doc/$MAJOR_MINOR/" \
-            --footer-text "spdx-python-model $VERSION" \
-            -o "$OUT"
+          PDOC_OUT="pages/doc/$MAJOR_MINOR" \
+          PDOC_LOGO_LINK="/spdx-python-model/doc/$MAJOR_MINOR/" \
+          ./scripts/build-docs.sh
 
           # On release: update stable/ to match this major.minor.
           if [[ "$IS_RELEASE" == "true" ]]; then
