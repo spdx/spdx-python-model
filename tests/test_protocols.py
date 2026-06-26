@@ -13,6 +13,31 @@ from pathlib import Path
 PYPROJECT = Path(__file__).resolve().parents[1] / "pyproject.toml"
 DATA_DIR = Path(__file__).parent / "data"
 
+# Each version's instances of these classes must satisfy SpdxObject.
+_CLASSES = [
+    "Person",
+    "Element",
+    "ElementCollection",
+    "SpdxDocument",
+    "CreationInfo",
+    "Relationship",
+    "RelationshipType",
+    "IndividualElement",
+    "software_Package",
+    "software_Sbom",
+    "simplelicensing_AnyLicenseInfo",
+    "expandedlicensing_IndividualLicensingInfo",
+    "expandedlicensing_License",
+]
+
+# Named-individual IRI constants (str) that must exist, as (owning class, name).
+_NAMED_INDIVIDUALS = [
+    ("IndividualElement", "NoneElement"),
+    ("IndividualElement", "NoAssertionElement"),
+    ("expandedlicensing_IndividualLicensingInfo", "NoAssertionLicense"),
+    ("expandedlicensing_IndividualLicensingInfo", "NoneLicense"),
+]
+
 
 def _available_versions() -> list[str]:
     """Module names (e.g. "v3_0_1") of every generated version binding."""
@@ -36,22 +61,23 @@ def _build_probe(versions: list[str]) -> str:
         "    return sum(1 for _ in s.foreach())\n\n\n"
     )
 
-    # Per version: concrete classes and module satisfy the protocols, and the
-    # agnostic `count` accepts the object set.
     checks = ""
     for v in versions:
         checks += (
-            f"objset_{v}: SpdxObjectSet = {v}.SHACLObjectSet()\n"
-            f"person_{v}: SpdxObject = {v}.Person()\n"
+            # Assignment to protocol type forces the static conformance check.
             f"module_{v}: SpdxModelModule = {v}\n"
+            f"objset_{v}: SpdxObjectSet = {v}.SHACLObjectSet()\n"
             f"count(objset_{v})\n"
-            # SHACLObjectSet() is typed SpdxObjectSet; Person() resolves to Any.
             f"count(module_{v}.SHACLObjectSet())\n"
-            f"module_{v}.SHACLObjectSet().add(module_{v}.Person())\n\n"
+            f"module_{v}.SHACLObjectSet().add(module_{v}.Person())\n"
         )
+        for i, cls in enumerate(_CLASSES):
+            checks += f"c{i}_{v}: SpdxObject = {v}.{cls}()\n"
+        for i, (cls, name) in enumerate(_NAMED_INDIVIDUALS):
+            checks += f"n{i}_{v}: str = {v}.{cls}.{name}\n"
+        checks += "\n"
 
-    # Cross-version: every version's object set coexists in one
-    # List[SpdxObjectSet], consumed by one agnostic function.
+    # All versions' object sets coexist in one List[SpdxObjectSet].
     all_sets = ", ".join(f"objset_{v}" for v in versions)
     checks += (
         f"every: List[SpdxObjectSet] = [{all_sets}]\n"
