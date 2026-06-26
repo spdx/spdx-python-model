@@ -8,9 +8,10 @@ import importlib
 import json
 from pathlib import Path
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any, List, Tuple, cast
 
 from .bindings import _CONTEXT_TABLE
+from .protocols import SpdxModelModule, SpdxObject, SpdxObjectSet
 from .version import VERSION
 from .version import VERSION as __version__
 
@@ -22,6 +23,9 @@ if TYPE_CHECKING:
 __all__ = [
     "bindings",  # generated # noqa: F405
     "LoadError",
+    "SpdxModelModule",
+    "SpdxObject",
+    "SpdxObjectSet",
     "VERSION",
     "__version__",
     "load",
@@ -47,14 +51,17 @@ def __dir__() -> List[str]:
     return sorted(set(globals()) | _VERSION_MODULES)
 
 
-def load_data(data: Any) -> Tuple[ModuleType, Any]:
+def load_data(data: Any) -> Tuple[ModuleType, "SpdxObjectSet"]:
     """
     Automatically load a SPDX 3 JSON document with the correct model based on
     its context
 
     :param data: The decoded JSON data as a Python dict
 
-    :returns: A tuple that contains the model and the decoded SHACLObjectSet
+    :returns: A tuple that contains the model and the decoded SHACLObjectSet.
+        The object set is typed as the version-agnostic
+        :class:`~spdx_python_model.protocols.SpdxObjectSet`; the model is the
+        concrete version submodule (a ``ModuleType``).
 
     :raises LoadError: If the data is missing a context or if the context is
         not recognized
@@ -92,17 +99,20 @@ def load_data(data: Any) -> Tuple[ModuleType, Any]:
 
     d.deserialize_data(data, objset)
 
-    return model, objset
+    return model, cast("SpdxObjectSet", objset)
 
 
-def load(path: Path) -> Tuple[ModuleType, Any]:
+def load(path: Path) -> Tuple[ModuleType, "SpdxObjectSet"]:
     """
     Automatically load a SPDX 3 JSON document with the correct model based on
     its context
 
     :param path: The path to the SPDX 3 JSON file
 
-    :returns: A tuple that contains the model and the decoded SHACLObjectSet
+    :returns: A tuple that contains the model and the decoded SHACLObjectSet.
+        The object set is typed as the version-agnostic
+        :class:`~spdx_python_model.protocols.SpdxObjectSet`; the model is the
+        concrete version submodule (a ``ModuleType``).
 
     :raises LoadError: If the data is missing a context or if the context is
         not recognized
