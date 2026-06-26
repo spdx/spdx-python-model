@@ -145,28 +145,40 @@ to get started with spdx-python-model.
 
 ### Version-agnostic types
 
-Each SPDX 3 minor version has its own set of generated types, so
-`v3_0_1.SHACLObjectSet` and `v3_1.SHACLObjectSet` are technically distinct. SPDX
-3 keeps backward compatibility across minor versions, so the package also exposes
-version-neutral [`Protocol`](https://docs.python.org/3/library/typing.html#typing.Protocol)
-types you can use to write functions that work with any 3.x version and still
-pass strict type checking:
+While SPDX 3 keeps backward compatibility across minor versions, internally in
+`spdx-python-model` each minor version has its own set of generated types, so
+`v3_0_1.SHACLObjectSet` and `v3_1.SHACLObjectSet` are technically distinct.
+To assist strict type checking, the package exposes version-neutral Python
+[`Protocol`](https://docs.python.org/3/library/typing.html#typing.Protocol)
+structural types you can use to write functions that work with any 3.x version
+and still pass strict type checking:
 
 ```python
 from spdx_python_model import SpdxObjectSet, load
 
-# Works with the object set from any SPDX 3.x version.
 def count_persons(objset: SpdxObjectSet) -> int:
     return sum(1 for _ in objset.foreach_type("Person"))
 
-_model, objset = load(path)  # objset is typed as SpdxObjectSet
+model, objset = load(path)  # objset is typed as SpdxObjectSet
 print(count_persons(objset))
 ```
 
-`load()` returns the object set typed as `SpdxObjectSet`. Also available:
-`SpdxObject` (a single object) and `SpdxModelModule` (a version submodule). These
-are for typing only; construct objects with a concrete version (e.g.
-`v3_0_1.Person()`).
+Three structural types are available:
+
+- `SpdxObjectSet` — a collection of SPDX objects (`SHACLObjectSet`)
+- `SpdxObject` — a single SPDX object (`SHACLObject`)
+- `SpdxModelModule` — a version submodule (e.g. the `model` returned by `load()`)
+
+These are for static typing only. Construct objects using a concrete version:
+
+```python
+# From a known version module
+p = v3_0_1.Person()
+
+# Or from the model returned by load()
+model, objset = load(path)
+p = model.Person()
+```
 
 ## Testing
 
