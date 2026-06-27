@@ -65,6 +65,20 @@ artifacts = [
     "*.pyi",
 ]
 
+# Generate the version-agnostic domain Protocols from the baseline bindings.
+# Runs after generate-bindings (reads its baseline model.pyi). clean_out_dir is
+# false so the hand-written core.py / __init__.py in the package are preserved.
+[[tool.hatch.build.hooks.build-scripts.scripts]]
+out_dir = "src/spdx_python_model/protocols"
+work_dir = "gen"
+clean_out_dir = false
+commands = [
+    "./generate-protocols"
+]
+artifacts = [
+    "_domain.py",
+]
+
 [tool.hatch.version]
 path = "src/spdx_python_model/version.py"
 
@@ -83,5 +97,8 @@ addopts = [
 ]
 
 [tool.pylint.main]
-# The generated binding fails style checks. Ignore it.
-ignore-paths = ['^src/spdx_python_model/bindings/v3_0_1/.*$']
+# The generated binding and domain protocols fail style checks. Ignore them.
+ignore-paths = [
+    '^src/spdx_python_model/bindings/v3_0_1/.*$',
+    '^src/spdx_python_model/protocols/_domain.py$',
+]

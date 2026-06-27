@@ -1,0 +1,177 @@
+#! /usr/bin/env python3
+#
+# SPDX-FileType: SOURCE
+# SPDX-License-Identifier: Apache-2.0
+#
+# Generate version-agnostic domain Protocols (_domain.py) from the baseline
+# version's model.pyi stub. Run after generate-bindings, from the gen/ dir.
+#
+# SPDX 3 keeps minor versions backward compatible, so the baseline (oldest)
+# version's surface is the common subset every newer version satisfies. One
+# Protocol is emitted per SPDX domain class, named identically to the binding
+# class (so callers write e.g. ``protocols.Element``):
+#   - scalar properties      -> plain attribute (read + write)
+#   - object-ref / list props -> typed @property getter (covariant read) plus an
+#                                Any setter (version-agnostic write)
+
+from __future__ import annotations
+
+import ast
+import re
+import sys
+from pathlib import Path
+
+# Machinery base classes that map to the hand-written core SpdxObject protocol.
+_BASE_TO_CORE = {"SHACLObject", "SHACLExtensibleObject"}
+
+HEADER = '''\
+# SPDX-FileType: SOURCE
+# SPDX-License-Identifier: Apache-2.0
+#
+# Generated from {baseline}/model.pyi at build time. DO NOT EDIT.
+"""Version-agnostic domain Protocols, one per SPDX 3 class.
+
+Each protocol is satisfied by the corresponding class of every supported SPDX 3
+minor version. Object-reference properties expose a typed getter (read) and an
+Any setter (write); construct objects with a concrete version.
+"""
+
+from __future__ import annotations
+
+from datetime import datetime
+from typing import Any, Iterable, Optional, Protocol, Union
+
+from .core import SpdxObject
+'''
+
+
+def _kwonly_props(cls: ast.ClassDef) -> list[str]:
+    """Property names = the __init__ keyword-only arguments of this class.
+
+    Using __init__ (rather than the body annotations) reliably excludes ClassVars
+    and named-individual string constants, which are not constructor arguments.
+    """
+    for node in cls.body:
+        if isinstance(node, ast.FunctionDef) and node.name == "__init__":
+            return [a.arg for a in node.args.kwonlyargs]
+    return []
+
+
+def _body_read_types(cls: ast.ClassDef) -> dict[str, str]:
+    """Map each property name to its READ-type annotation (as source)."""
+    types: dict[str, str] = {}
+    for node in cls.body:
+        if isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+            ann = ast.unparse(node.annotation)
+            if ann.startswith("ClassVar["):
+                continue
+            types[node.target.id] = ann
+        elif isinstance(node, ast.FunctionDef) and node.returns is not None:
+            if any(
+                isinstance(d, ast.Name) and d.id == "property"
+                for d in node.decorator_list
+            ):
+                types[node.name] = ast.unparse(node.returns)
+    return types
+
+
+def _collect(tree: ast.Module) -> dict[str, ast.ClassDef]:
+    return {n.name: n for n in tree.body if isinstance(n, ast.ClassDef)}
+
+
+def _domain_classes(classes: dict[str, ast.ClassDef]) -> list[str]:
+    """Names of classes that (transitively) derive from SHACLObject, in source
+    order, excluding the machinery bases themselves."""
+    out: list[str] = []
+    for name, cls in classes.items():
+        if name in _BASE_TO_CORE:
+            continue
+        seen: set[str] = set()
+        stack = list(cls.bases)
+        while stack:
+            b = stack.pop()
+            if not isinstance(b, ast.Name) or b.id in seen:
+                continue
+            seen.add(b.id)
+            if b.id in _BASE_TO_CORE:
+                out.append(name)
+                break
+            parent = classes.get(b.id)
+            if parent is not None:
+                stack.extend(parent.bases)
+    return out
+
+
+def _map_base(name: str) -> str:
+    return "SpdxObject" if name in _BASE_TO_CORE else name
+
+
+def _is_object_ref(ann: str, domain: set[str]) -> bool:
+    if "ListProxy[" in ann:
+        return True
+    return bool(set(re.findall(r"[A-Za-z_][A-Za-z0-9_]*", ann)) & domain)
+
+
+def _emit_class(cls: ast.ClassDef, domain: set[str]) -> str:
+    bases = [_map_base(b.id) for b in cls.bases if isinstance(b, ast.Name)] or [
+        "SpdxObject"
+    ]
+    base_list = ", ".join(dict.fromkeys(bases + ["Protocol"]))
+
+    read_types = _body_read_types(cls)
+    lines = [f"class {cls.name}({base_list}):"]
+    body: list[str] = []
+    for p in _kwonly_props(cls):
+        ann = read_types.get(p)
+        if ann is None:
+            continue
+        # The read view of a list property is an Iterable, not the ListProxy.
+        ann = ann.replace("ListProxy[", "Iterable[")
+        if _is_object_ref(ann, domain):
+            body.append("    @property")
+            body.append(f"    def {p}(self) -> {ann}: ...")
+            body.append(f"    @{p}.setter")
+            body.append(f"    def {p}(self, value: Any) -> None: ...")
+        else:
+            body.append(f"    {p}: {ann}")
+    if not body:
+        body.append("    pass")
+    return "\n".join(lines + body)
+
+
+def generate(stub_src: str, baseline: str) -> str:
+    tree = ast.parse(stub_src)
+    classes = _collect(tree)
+    domain = _domain_classes(classes)
+    domain_set = set(domain)
+    blocks = [_emit_class(classes[name], domain_set) for name in domain]
+    all_block = "".join(f'    "{d}",\n' for d in domain)
+    return (
+        HEADER.format(baseline=baseline)
+        + f"\n__all__ = [\n{all_block}]\n\n\n"
+        + "\n\n\n".join(blocks)
+        + "\n"
+    )
+
+
+def _find_baseline(gen_dir: Path) -> Path:
+    """The oldest generated version directory (lexicographically first vN_...)."""
+    candidates = sorted(
+        p for p in gen_dir.iterdir() if p.is_dir() and re.match(r"v\d", p.name)
+    )
+    for p in candidates:
+        if (p / "model.pyi").exists():
+            return p
+    raise SystemExit("generate-protocols: no baseline model.pyi found")
+
+
+def main() -> int:
+    gen_dir = Path(__file__).resolve().parent
+    baseline = _find_baseline(gen_dir)
+    out = generate((baseline / "model.pyi").read_text(), baseline.name)
+    (gen_dir / "_domain.py").write_text(out)
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())

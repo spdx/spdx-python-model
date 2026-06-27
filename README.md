@@ -163,11 +163,27 @@ model, objset = load(path)  # objset is typed as SpdxObjectSet
 print(count_persons(objset))
 ```
 
-Three structural types are available:
+Three core structural types are available:
 
 - `SpdxObjectSet` — a collection of SPDX objects (`SHACLObjectSet`)
 - `SpdxObject` — a single SPDX object (`SHACLObject`)
 - `SpdxModelModule` — a version submodule (e.g. the `model` returned by `load()`)
+
+In addition, the `spdx_python_model.protocols` submodule provides a
+version-agnostic protocol for every SPDX class (`protocols.Element`,
+`protocols.Relationship`, `protocols.CreationInfo`, …). A function annotated with
+these reads any property (typed) and writes scalar or object-reference properties,
+for any 3.x version:
+
+```python
+from typing import Optional
+from spdx_python_model import protocols
+
+def relabel(e: protocols.Element, ci: protocols.CreationInfo) -> Optional[str]:
+    e.name = "renamed"        # write a scalar property
+    e.creationInfo = ci       # write an object-reference property
+    return e.name             # read it back (typed)
+```
 
 These are for static typing only. Construct objects using a concrete version:
 
@@ -179,6 +195,10 @@ p = v3_0_1.Person()
 model, objset = load(path)
 p = model.Person()
 ```
+
+When writing object-reference properties, the assigned value is accepted as
+`Any` — the value must belong to the same SPDX version as the object it is added
+to (this is enforced at runtime). Construction always uses a concrete version.
 
 ## Testing
 
