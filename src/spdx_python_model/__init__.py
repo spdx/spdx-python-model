@@ -8,27 +8,29 @@ import importlib
 import json
 from pathlib import Path
 from types import ModuleType
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import TYPE_CHECKING, Any, List, Tuple, cast
 
 from .bindings import _CONTEXT_TABLE
 from .version import VERSION
 from .version import VERSION as __version__
 
 if TYPE_CHECKING:
-    # Re-exports to give type checkers version types.
-    # Not imported during runtime.
     from .bindings import *  # noqa: F403
+    from .protocols import SpdxModelModule, SpdxObject, SpdxObjectSet
 
 __all__ = [
     "bindings",  # generated # noqa: F405
     "LoadError",
+    "SpdxModelModule",
+    "SpdxObject",
+    "SpdxObjectSet",
     "VERSION",
     "__version__",
     "load",
     "load_data",
+    "protocols",  # lazy submodule via __getattr__ # noqa: F405
 ]
 
-# Version submodule names accepted by __getattr__ for top-level import.
 _VERSION_MODULES = frozenset(_CONTEXT_TABLE.values())
 
 
@@ -36,10 +38,15 @@ class LoadError(Exception):
     """Raised when a SPDX document cannot be loaded."""
 
 
-def __getattr__(name: str) -> ModuleType:
-    """Lazily import a version's bindings on first top-level access (PEP 562)."""
+def __getattr__(name: str) -> Any:
+    """Lazily import a version's bindings or the protocols package (PEP 562)."""
     if name in _VERSION_MODULES:
         return importlib.import_module(f"{__name__}.bindings.{name}")
+    if name == "protocols":
+        return importlib.import_module(f"{__name__}.protocols")
+    if name in ("SpdxObject", "SpdxObjectSet", "SpdxModelModule"):
+        protocols = importlib.import_module(f"{__name__}.protocols")
+        return getattr(protocols, name)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
@@ -47,14 +54,16 @@ def __dir__() -> List[str]:
     return sorted(set(globals()) | _VERSION_MODULES)
 
 
-def load_data(data: Any) -> Tuple[ModuleType, Any]:
+def load_data(data: Any) -> Tuple[ModuleType, "SpdxObjectSet"]:
     """
     Automatically load a SPDX 3 JSON document with the correct model based on
     its context
 
     :param data: The decoded JSON data as a Python dict
 
-    :returns: A tuple that contains the model and the decoded SHACLObjectSet
+    :returns: A tuple of ``(model, objset)`` where ``objset`` is typed as
+        :class:`~spdx_python_model.protocols.SpdxObjectSet` and ``model`` is
+        the concrete version submodule (``ModuleType``).
 
     :raises LoadError: If the data is missing a context or if the context is
         not recognized
@@ -92,17 +101,19 @@ def load_data(data: Any) -> Tuple[ModuleType, Any]:
 
     d.deserialize_data(data, objset)
 
-    return model, objset
+    return model, cast("SpdxObjectSet", objset)
 
 
-def load(path: Path) -> Tuple[ModuleType, Any]:
+def load(path: Path) -> Tuple[ModuleType, "SpdxObjectSet"]:
     """
     Automatically load a SPDX 3 JSON document with the correct model based on
     its context
 
     :param path: The path to the SPDX 3 JSON file
 
-    :returns: A tuple that contains the model and the decoded SHACLObjectSet
+    :returns: A tuple of ``(model, objset)`` where ``objset`` is typed as
+        :class:`~spdx_python_model.protocols.SpdxObjectSet` and ``model`` is
+        the concrete version submodule (``ModuleType``).
 
     :raises LoadError: If the data is missing a context or if the context is
         not recognized
