@@ -27,14 +27,16 @@ for v in $SPDX_VERSIONS; do
             --context-url "file://${SHACL2CODE_SPDX_DIR}/$v/spdx-context.jsonld" $CONTEXT_URL \
             --license Apache-2.0 \
             python \
-            --output "$MODNAME"
+            --output "$MODNAME" \
+            --include-main no
     else
         shacl2code generate --input https://spdx.org/rdf/$v/spdx-model.ttl \
             --input https://spdx.org/rdf/$v/spdx-json-serialize-annotations.ttl \
             --context $CONTEXT_URL \
             --license Apache-2.0 \
             python \
-            --output "$MODNAME"
+            --output "$MODNAME" \
+            --include-main no
     fi
 done
 
