@@ -6,11 +6,12 @@ Python bindings for the SPDX 3 data model.
 
 import importlib
 import json
+import warnings
 from pathlib import Path
 from types import ModuleType
 from typing import TYPE_CHECKING, Any, List, Tuple, cast
 
-from .bindings import _CONTEXT_TABLE
+from .bindings import _CONTEXT_TABLE, _DRAFT_VERSIONS
 from .version import VERSION
 from .version import VERSION as __version__
 
@@ -21,6 +22,7 @@ if TYPE_CHECKING:
 __all__ = [
     "bindings",  # generated # noqa: F405
     "LoadError",
+    "SPDXDraftWarning",
     "SpdxModelModule",
     "SpdxObject",
     "SpdxObjectSet",
@@ -38,9 +40,31 @@ class LoadError(Exception):
     """Raised when a SPDX document cannot be loaded."""
 
 
+class SPDXDraftWarning(FutureWarning):
+    """Warns that a loaded SPDX version is still in development (draft).
+
+    To suppress::
+
+        import warnings
+        from spdx_python_model import SPDXDraftWarning
+        warnings.filterwarnings("ignore", category=SPDXDraftWarning)
+    """
+
+
+def _warn_if_draft(module_name: str) -> None:
+    if module_name in _DRAFT_VERSIONS:
+        warnings.warn(
+            f"SPDX bindings '{module_name}' track an in-development draft and "
+            "may change without notice.",
+            SPDXDraftWarning,
+            stacklevel=3,
+        )
+
+
 def __getattr__(name: str) -> Any:
     """Lazily import a version's bindings or the protocols package (PEP 562)."""
     if name in _VERSION_MODULES:
+        _warn_if_draft(name)
         return importlib.import_module(f"{__name__}.bindings.{name}")
     if name == "protocols":
         return importlib.import_module(f"{__name__}.protocols")
@@ -94,6 +118,7 @@ def load_data(data: Any) -> Tuple[ModuleType, "SpdxObjectSet"]:
     if module_name is None:
         raise LoadError(f"Unknown context URL '{context_url}'")
 
+    _warn_if_draft(module_name)
     model = importlib.import_module(f"{__name__}.bindings.{module_name}")
 
     d = model.JSONLDDeserializer()

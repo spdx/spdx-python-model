@@ -87,7 +87,7 @@ for v in $SPDX_VERSIONS; do
             --context-url "file://${LOCAL_DIR}/spdx-context.jsonld" "$CONTEXT_URL" \
             --license Apache-2.0 \
             python \
-            --use-protocols yes \
+            --include-protocols yes \
             --output "$MODNAME"
     else
         shacl2code generate \
@@ -96,7 +96,7 @@ for v in $SPDX_VERSIONS; do
             --context "$CONTEXT_URL" \
             --license Apache-2.0 \
             python \
-            --use-protocols yes \
+            --include-protocols yes \
             --output "$MODNAME"
     fi
 done
