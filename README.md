@@ -143,6 +143,27 @@ to get started with spdx-python-model.
 
 [tutorial]: https://spdx.github.io/spdx-python-model/tutorial/using-spdx3.html
 
+### Version-agnostic types
+
+Each minor version has its own generated types, so `v3_0_1.Element` and
+`v3_1.Element` are technically distinct. The `protocols` submodule exposes
+version-neutral [protocol] types so one function works with any 3.x version:
+
+```python
+from typing import Optional
+from spdx_python_model import protocols
+
+def rename(e: protocols.Element, name: str) -> Optional[str]:
+    e.name = name
+    return e.name
+```
+
+Class hierarchy is preserved (`protocols.Agent` accepts `Person`, `Tool`, etc.
+from any version). These protocols are for static typing only; construct objects
+with a concrete version (`v3_0_1.Person()` or `model.Person()` from `load()`).
+
+[Protocol]: https://docs.python.org/3/library/typing.html#typing.Protocol
+
 ## Testing
 
 This repository has support for running tests against the bindings using `pytest`.
