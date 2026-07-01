@@ -23,6 +23,16 @@ doesn't yet support SPDX 3).
 
 ## Installation
 
+The SPDX model files are bundled under the `spdx_model/` directory.
+This makes the package buildable on build systems that prohibit network
+access during packaging, such as Debian or Yocto.
+
+> **Note:** `v3_1` bindings track the in-development SPDX 3.1 draft and are
+> provided for early testing. They may change without notice.
+
+To force fetching model files from spdx.org instead of using the bundled files,
+set `SHACL2CODE_SPDX_FORCE_NETWORK=1`.
+
 ### Install from PyPI
 
 ```shell
@@ -41,13 +51,10 @@ python3 -m pip install git+https://github.com/spdx/spdx-python-model.git@main
 Note that this will pull the latest version from the `main` branch. If you want
 a specific commit, replace `main` with the git commit SHA.
 
-### Install/build using local SPDX model files
+### Install/build using SPDX model files from a custom directory
 
-Using local SPDX model files is ideal for testing pre-release versions
-or when official URLs are not yet live.
-
-It is also required for build systems that prohibit network access during
-packaging, such as Debian or Yocto.
+Pointing to your own directory of SPDX model files is useful for testing
+pre-release versions or when official URLs are not yet live.
 
 To build using local model files:
 
@@ -64,8 +71,8 @@ To build using local model files:
     for a specific SPDX version and keep it in a local directory:
 
     ```shell
-    mkdir -p ~/spdx_models/v3.0.1
-    cd ~/spdx_models/v3.0.1
+    mkdir -p ~/my_spdx_model/3.0.1
+    cd ~/my_spdx_model/3.0.1
     wget https://spdx.org/rdf/3.0.1/spdx-context.jsonld
     wget https://spdx.org/rdf/3.0.1/spdx-json-serialize-annotations.ttl
     wget https://spdx.org/rdf/3.0.1/spdx-model.ttl
@@ -78,7 +85,7 @@ To build using local model files:
 
     ```text
     <SHACL2CODE_SPDX_DIR>/
-    └── v[VERSION]/
+    └── [VERSION]/
         ├── spdx-context.jsonld
         ├── spdx-json-serialize-annotations.ttl
         └── spdx-model.ttl
@@ -89,7 +96,7 @@ To build using local model files:
     Point `SHACL2CODE_SPDX_DIR` environment variable to that local directory.
 
     ```shell
-    export SHACL2CODE_SPDX_DIR=~/spdx_models
+    export SHACL2CODE_SPDX_DIR=~/my_spdx_model
     ```
 
 4) Install/build:
@@ -170,3 +177,13 @@ matches the version number specified in `version.py` (e.g. `v1.0.0`).
 
 After this, GitHub actions will do the rest to build the package and publish it
 to PyPI.
+
+### Promoting a draft SPDX version
+
+When an SPDX draft version is finalized, move it from `SPDX_VERSIONS_DRAFT` to
+`SPDX_VERSIONS_RELEASE` in [`gen/generate-bindings`](gen/generate-bindings),
+and refresh its model files under `spdx_model/` from the finalized URLs.
+
+This stops the `SPDXDraftWarning` from being emitted when the version's bindings
+are used. The draft status is determined at build time from this script, not
+from the model files, so it only changes when a new release is published.

@@ -6,11 +6,12 @@ Python bindings for the SPDX 3 data model.
 
 import importlib
 import json
+import warnings
 from pathlib import Path
 from types import ModuleType
 from typing import TYPE_CHECKING, Any, List, Tuple
 
-from .bindings import _CONTEXT_TABLE
+from .bindings import _CONTEXT_TABLE, _DRAFT_VERSIONS
 from .version import VERSION
 from .version import VERSION as __version__
 
@@ -22,6 +23,7 @@ if TYPE_CHECKING:
 __all__ = [
     "bindings",  # generated # noqa: F405
     "LoadError",
+    "SPDXDraftWarning",
     "VERSION",
     "__version__",
     "load",
@@ -36,9 +38,32 @@ class LoadError(Exception):
     """Raised when a SPDX document cannot be loaded."""
 
 
+class SPDXDraftWarning(FutureWarning):
+    """Warns that a loaded SPDX version is still in development (draft).
+
+    Filter it with::
+
+        import warnings
+        from spdx_python_model import SPDXDraftWarning
+        warnings.filterwarnings("ignore", category=SPDXDraftWarning)
+    """
+
+
+def _warn_if_draft(module_name: str) -> None:
+    """Emit a :class:`SPDXDraftWarning` if ``module_name`` is a draft version."""
+    if module_name in _DRAFT_VERSIONS:
+        warnings.warn(
+            f"SPDX bindings '{module_name}' track an in-development draft and "
+            f"may change without notice until the version is finalized.",
+            SPDXDraftWarning,
+            stacklevel=3,
+        )
+
+
 def __getattr__(name: str) -> ModuleType:
     """Lazily import a version's bindings on first top-level access (PEP 562)."""
     if name in _VERSION_MODULES:
+        _warn_if_draft(name)
         return importlib.import_module(f"{__name__}.bindings.{name}")
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
@@ -85,6 +110,7 @@ def load_data(data: Any) -> Tuple[ModuleType, Any]:
     if module_name is None:
         raise LoadError(f"Unknown context URL '{context_url}'")
 
+    _warn_if_draft(module_name)
     model = importlib.import_module(f"{__name__}.bindings.{module_name}")
 
     d = model.JSONLDDeserializer()
