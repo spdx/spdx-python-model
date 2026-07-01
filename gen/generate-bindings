@@ -87,8 +87,9 @@ for v in $SPDX_VERSIONS; do
             --context-url "file://${LOCAL_DIR}/spdx-context.jsonld" "$CONTEXT_URL" \
             --license Apache-2.0 \
             python \
-            --include-protocols yes \
-            --output "$MODNAME"
+            --output "$MODNAME" \
+            --include-main no \
+            --include-protocols yes
     else
         shacl2code generate \
             --input "https://spdx.org/rdf/$v/spdx-model.ttl" \
@@ -96,8 +97,9 @@ for v in $SPDX_VERSIONS; do
             --context "$CONTEXT_URL" \
             --license Apache-2.0 \
             python \
-            --include-protocols yes \
-            --output "$MODNAME"
+            --output "$MODNAME" \
+            --include-main no \
+            --include-protocols yes
     fi
 done
 
