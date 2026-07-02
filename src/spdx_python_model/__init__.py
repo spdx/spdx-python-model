@@ -61,6 +61,13 @@ def _warn_if_draft(module_name: str) -> None:
         )
 
 
+# Names served by __getattr__ that don't exist in globals() until first
+# access. Shared with __dir__() so lazy names stay discoverable without
+# forcing the import that makes them lazy in the first place.
+_PROTOCOLS_REEXPORTS = frozenset({"SpdxObject", "SpdxObjectSet", "SpdxModelModule"})
+_LAZY_ATTRS = _PROTOCOLS_REEXPORTS | {"protocols"}
+
+
 def __getattr__(name: str) -> Any:
     """Lazily import a version's bindings or the protocols package (PEP 562)."""
     if name in _VERSION_MODULES:
@@ -68,14 +75,14 @@ def __getattr__(name: str) -> Any:
         return importlib.import_module(f"{__name__}.bindings.{name}")
     if name == "protocols":
         return importlib.import_module(f"{__name__}.protocols")
-    if name in ("SpdxObject", "SpdxObjectSet", "SpdxModelModule"):
+    if name in _PROTOCOLS_REEXPORTS:
         protocols = importlib.import_module(f"{__name__}.protocols")
         return getattr(protocols, name)
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 def __dir__() -> List[str]:
-    return sorted(set(globals()) | _VERSION_MODULES)
+    return sorted(set(globals()) | _VERSION_MODULES | _LAZY_ATTRS)
 
 
 def load_data(data: Any) -> Tuple[ModuleType, "SpdxObjectSet"]:
