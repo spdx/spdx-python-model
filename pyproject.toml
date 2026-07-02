@@ -49,7 +49,7 @@ issues = "https://github.com/spdx/spdx-python-model/issues"
 requires = [
     "hatchling >= 1.27.0",
     "hatch-build-scripts >= 0.0.4",
-    "shacl2code == 1.1.0",
+    "shacl2code >= 1.1.0",
 ]
 build-backend = "hatchling.build"
 
@@ -83,5 +83,8 @@ addopts = [
 ]
 
 [tool.pylint.main]
-# The generated binding fails style checks. Ignore it.
-ignore-paths = ['^src/spdx_python_model/bindings/v3_0_1/.*$']
+# Generated files fail style checks. Ignore them.
+ignore-paths = [
+    '^src/spdx_python_model/bindings/.*$',
+    '^src/spdx_python_model/protocols/_merged\\.py$',
+]
